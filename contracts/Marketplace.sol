@@ -60,8 +60,9 @@ contract Marketplace {
     }
 
     //TBD : Only store owner
-    function unregisterFrontshop () public {
+    function unregisterStorefront () public returns (bool successful){
       changeStorefrontState(msg.sender, StoreState.Removed);
+      return true;
     }
 
     //TBD : public
