@@ -1,8 +1,13 @@
 pragma solidity ^0.4.24;
 
-contract Store {
+import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
 
-    //TBD : add quantity
+import "../node_modules/openzeppelin-solidity/contracts/payment/PullPayment.sol";
+
+
+contract Store is PullPayment {
+
+    using SafeMath for uint256;
 
     /* Let's make sure everyone knows who owns the store.*/
     address public store_owner;
@@ -15,119 +20,152 @@ contract Store {
     /* Well we have customers */
     //mapping (address => Customer) customers;
     /*Product index*/
-    uint256 productNumber;
+    uint256 public productNumber = 0;
     /*Status of the product*/
-    bool[] public productIsForSale;
+    bool[] public isForSale;
 
     /* Product is a struct */
     struct Product {
       uint256 id;
       bytes32 name;
+      uint256 quantity;
       bytes32 description;
       uint256 price;
     }
 
     // Events - publicize actions to external listeners
-    // TBD
-    /* Store Events */
-    // TBD : change name of events, use "Log" same as event LogDepositMade(address accountAddress, uint amount);
-    event StoreCreation(address owner, bytes32 storeName);
-    event StoreDeletion(address owner, bytes32 soreName);
-    event StoreAddProduct(address owner, bytes32 store_name, uint256 id, bytes32 name);
-    event StoreRemoveProduct(address owner, bytes32 store_name, uint256 id, bytes32 name);
-    event StoreUpdateProduct(address owner, bytes32 store_name, uint256 id, bytes32 name);
-    event StorePurchaseProduct(address owner, bytes32 store_name, address customer, uint256 id, uint256 amount);
-    event StoreUpdatePrice(address owner, bytes32 store_name, uint256 id, bytes32 name, uint256 price);
+    event LogCreate(bytes32 storeName, address byAddress);
+    event LogDelete(bytes32 storeName, address byAddress); // not used yet
+    event LogAddProduct(bytes32 storeName, uint256 id, bytes32 name);
+    event LogRemoveProduct(bytes32 storeName, uint256 id, bytes32 name);
+    event LogUpdatePrice(bytes32 storeName, uint256 id, uint256 oldPrice, uint256 newPrice);
+    event LogUpdateQuantity(bytes32 storeName, uint256 id, uint256 oldQuantity, uint256 newQuantity);
+    event LogUpdateDescription(bytes32 storeName, uint256 id, bytes32 oldDescription, bytes32 newDescription);
+    event LogPurchaseProduct(uint256 id, uint256 quantity, uint256 totalPrice, address customerAddress);
 
-    /* Store modifier  */ /*TBD*/
-    /*
-      modifier verifyIsOwner (address _address) { require (msg.sender == owner);_;}
-      modifier verifyCaller (address _address) { require (msg.sender == _address); _;}
-      modifier paidEnough(uint _price) { require(msg.value >= _price); _;}
-      modifier checkValue(uint _sku)
-    */
+    /* Store modifier  */
+    // à ajouter dans la couche gestion owner : modifier verifyIsOwner (address _address) { require (msg.sender == owner);_;}
+    // à ajouter dans la couche verification du caller modifier verifyCaller (address _address) { require (msg.sender == _address); _;}*/
 
-    // Constructor, can receive one or many variables here; only one allowed
+      modifier forSale (uint256 _id)
+      {
+          require (_id >= productNumber && isForSale[_id] == true,
+            "Item is not ForSale."
+          );
+          _;
+      }
+
+      modifier enoughStock (uint256 _id, uint256 _quantity)
+      {
+          require (_quantity >= products[_id].quantity,
+            "Not enough stock."
+          );
+          _;
+      }
+
+      modifier paidEnough(uint256 _id, uint256 _quantity) {
+        require ((msg.value >= ((products[_id].price).mul(_quantity))),
+          "Not enough money."
+        );
+        _;
+      }
+
+      modifier giveBackChange(uint256 _id, uint256 _quantity) {
+        //refund them after pay for item (why it is before, _ checks for logic before func)
+        _;
+        msg.sender.transfer(msg.value - products[_id].price * _quantity);
+      }
+
     // !!!! TBD ? : réaliser le register du store vers la marketplace dans le construteur du store ?
-    constructor (/*bytes32 _name*/) public {
+    constructor (bytes32 _name) public {
         /* Set the owner to the creator of this contract */
-        bytes32 _name = "toto";
         store_owner = msg.sender;
         store_name = _name;
         store_balance = 0;
-        emit StoreCreation(msg.sender, store_name);
+        emit LogCreate(store_name, msg.sender);
     }
 
     function nProductsForSale () public returns (uint256 n){
       n = 0;
       uint256 i = 0;
-      for(i=0;i<productIsForSale.length;i++){
-        if(productIsForSale[i]==true)n=n+1;
+      for(i=0;i<isForSale.length;i++){
+        if(isForSale[i]==true)n=n+1;
       }
       return n;
     }
 
-    function addProduct (bytes32 _name, bytes32 _description, uint256 _price) public returns (uint256 id) {
-      //productNumber++;
-      id = productIsForSale.length;
+    function addProduct (bytes32 _name, uint256 _quantity, bytes32 _description, uint256 _price) public returns (uint256 id) {
+      //id = isForSale.length;
+      id = productNumber;
       Product memory product;
       product.name = _name;
+      product.quantity = _quantity;
       product.description = _description;
       product.price = _price;
-      products[productNumber] = product;
-      productIsForSale.push(true);
+      products[id] = product;
+      isForSale.push(true);
       productNumber++;
-      emit StoreAddProduct(msg.sender, store_name, productNumber, _name);
+      emit LogAddProduct(store_name, id, _name);
       return id;
     }
 
+    function getProduct (uint256 id)
+        public
+        returns (bytes32 name, uint256 quantity, bytes32 description, uint256 price)
+    {
+        require (isForSale[id]==true);
+        Product memory p = products[id];
+        return (p.name, p.quantity, p.description, p.price);
+    }
+
     function removeProduct (uint256 id) public returns (bool) {
-      bytes32 productRemovedName = products[id].name;
+      emit LogRemoveProduct(store_name, id, products[id].name);
       delete products[id];
-      productIsForSale[id] = false;
-      emit StoreRemoveProduct(msg.sender, store_name, id, productRemovedName);
-      return true;
+      isForSale[id] = false;
     }
 
-    function updateProduct (uint256 id, bytes32 _name, bytes32 _description, uint256 _price) public returns (bool){
-      Product memory product;
-      product.name = _name;
-      product.description = _description;
-      product.price = _price;
-      products[id] = product;
-      emit StoreUpdateProduct(msg.sender, store_name, id, _name);
-      return true;
+    function updatePrice (uint256 id, uint256 _price) public {
+      uint256 oldPrice = products[id].price;
+      products[id].price = _price;
+      emit LogUpdatePrice(store_name, id, oldPrice, _price);
     }
 
-    function updatePrice (uint256 id, uint256 _price) public returns (bool){
-      Product memory product;
-      product = products[id];
-      product.price = _price;
-      products[id] = product;
-      emit StoreUpdatePrice(msg.sender, store_name, product.id, product.name, product.price);
-      return true;
+    function updateQuantity (uint256 id, uint256 _quantity) public {
+      uint256 oldQuantity = products[id].quantity;
+      products[id].quantity = _quantity;
+      emit LogUpdateQuantity(store_name, id, oldQuantity, _quantity);
     }
 
-    function purchaseProduct (uint256 id, uint amount) public payable returns (bool successful){
-      //uint256 amount = 111;
-      //TBD : checker que le transfert est supérieur au prix du produit
-      //TBD if (balances[msg.sender] < amount) return false;
-      //TBD balances[msg.sender] -= amount;
-      store_balance += amount;
-      //balances[receiver][coin] += amount;
-      delete products[id];
-      productIsForSale.push(false);
-      emit StorePurchaseProduct(store_owner, store_name, msg.sender, id, amount);
-      return true;
+    function updateDescription (uint256 id, bytes32 _description) public {
+      bytes32 oldDescription = products[id].description;
+      products[id].description = _description;
+      emit LogUpdateDescription(store_name, id, oldDescription, _description);
     }
-/*
-    function sendCoin(address receiver, uint amount, uint coin) returns(bool successful) {
-        if (balances[msg.sender][coin] < amount) return false;
-        balances[msg.sender][coin] -= amount;
-        balances[receiver][coin] += amount;
-        return true;
+
+    function purchaseProduct (uint256 id, uint256 quantity /*string physical address */)
+    public
+    payable
+    forSale (id)
+    enoughStock (id, quantity)
+    paidEnough(id, quantity)
+    giveBackChange(id, quantity)
+    {
+      products[id].quantity = products[id].quantity.sub(quantity);
+      emit LogPurchaseProduct(id, quantity, (quantity.mul(products[id].price)), msg.sender);
     }
-*/
+
+    function withdrawReceivedPayments () public {
+        withdrawPayments();
+      }
+
+    function identicalProduct
+      (uint256 _id1, bytes32 _name1, bytes32 _description1, uint256 _price1,
+      uint256 _id2, bytes32 _name2, bytes32 _description2, uint256 _price2)
+      public
+      returns (bool isIdentical) {
+        if ((_id1==_id2) && (_name1==_name2) && (_description1==_description2) && (_price1==_price2)) return true;
+        else return false;
+    }
 
 // Fallback function - Called if other functions don't match call or
 // sent ether without data
