@@ -33,6 +33,7 @@ contract Marketplace {
 
     //Add modifier
     modifier verifyIsNotRegistered () { require (storesfronts[msg.sender].storeAddress==0);_;}
+
     modifier verifyStorefrontExists () { require (storesfronts[msg.sender].storeAddress!=0);_;}
     //Add event Log
 
