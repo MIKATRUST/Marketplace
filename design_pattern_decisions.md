@@ -1,1 +1,0 @@
-explains why you chose to use the design patterns that you did
