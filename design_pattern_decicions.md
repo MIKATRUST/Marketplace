@@ -16,11 +16,6 @@ matters.
 
 ### Lifetime
 
-Ownable,
-Pausable,
-Destructible,
-StoreLogic
-
 ///////!!! to be done
 //`auto_deprecation` - We have implemented a watchdog mechanism Provides a mechanism
 //for automatic expiration of a contract

@@ -20,3 +20,6 @@ module.exports.tryCatch = async function(promise, errType) {
 };
 
 const PREFIX = "VM Exception while processing transaction: ";
+
+//error.message.endsWith()
+//const SUFFIX = "is not a contract address";

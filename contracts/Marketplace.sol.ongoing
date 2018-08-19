@@ -1,0 +1,83 @@
+pragma solidity ^0.4.24;
+
+contract Marketplace is
+    Ownable,
+    Pausable,
+    Destructible,
+    MarketplaceLogic
+    {
+
+    constructor () public {
+        /* Set the owner to the creator of this contract */
+        //owner = msg.sender;
+        StoreNumber = 0;
+    }
+
+    function whoAmI()
+      public
+      whenNotPaused
+      returns (uint)
+    {
+      super.whoAmI();
+    }
+
+    function getApplicantStores()
+      public
+      onlyOwner
+      whenNotPaused
+      returns (address[])
+    {
+      return super.applicantStores();
+      // ie : store with state == ApplicationReceived
+    }
+
+    function acceptApplicantStore(address sid)
+      public
+      onlyOwner
+      whenNotPaused
+    {
+      super.acceptApplicantStore(sid);
+    }
+
+    function rejectApplicantStore(address sid)
+      public
+      onlyOwner
+      whenNotPaused
+    {
+      super.rejectApplicantStore(sid);
+    }
+
+    function suspendStore(address sid)
+      public
+      applicationAccepted(sid)
+      onlyOwner // Marketplace Owner
+      whenNotPaused
+    {
+      super.suspendStore(sid);
+    }
+
+    function removeStore(address sid)
+      public
+      applicationAccepted(sid)
+      // !!! TBD only store owner
+      whenNotPaused
+    {
+      super.removeStore(sid);
+    }
+
+    function getOpenStores()
+      public
+      whenNotPaused
+    {
+      //TBD : return
+      super.getOpenStores();
+    }
+
+    function getStoreState(address sid)
+      public
+      whenNotPaused
+      returns (uint256)
+    {
+      super.getStoreState(sid);
+    }
+}

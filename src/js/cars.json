@@ -1,0 +1,130 @@
+[
+  {
+    "id": 0,
+    "name": "CAR00",
+    "quantity":0,
+    "description":"Best car ever 00",
+    "picture": "images/CAR00.jpeg",
+    "price":10
+  },
+  {
+    "id": 1,
+    "name": "CAR01",
+    "quantity":1,
+    "description":"Best car ever 01",
+    "picture": "images/CAR01.jpeg",
+    "price": 11
+  },
+  {
+    "id": 2,
+    "name": "CAR02",
+    "quantity":2,
+    "description":"Best car ever 02",
+    "picture": "images/CAR02.jpeg",
+    "price": 12
+  },
+  {
+    "id": 3,
+    "name": "CAR03",
+    "quantity":3,
+    "description":"Best car ever 03",
+    "picture": "images/CAR03.jpeg",
+    "price": 13
+  },
+  {
+    "id": 4,
+    "name": "CAR04",
+    "quantity":4,
+    "description":"Best car ever 04",
+    "picture": "images/CAR04.jpeg",
+    "price": 14
+  },
+  {
+    "id": 5,
+    "name": "CAR05",
+    "quantity":5,
+    "description":"Best car ever 05",
+    "picture": "images/CAR05.jpeg",
+    "price": 15
+  },
+  {
+    "id": 6,
+    "name": "CAR06",
+    "quantity":6,
+    "description":"Best car ever 06",
+    "picture": "images/CAR06.jpeg",
+    "price": 16
+  },
+  {
+    "id": 7,
+    "name": "CAR07",
+    "quantity":7,
+    "description":"Best car ever 07",
+    "picture": "images/CAR07.jpeg",
+    "price": 17
+  },
+  {
+    "id": 8,
+    "name": "CAR08",
+    "quantity":8,
+    "description":"Best car ever 08",
+    "picture": "images/CAR08.jpeg",
+    "price": 18
+  },
+  {
+    "id": 9,
+    "name": "CAR09",
+    "quantity":9,
+    "description":"Best car ever 09",
+    "picture": "images/CAR09.jpeg",
+    "price": 19
+  },
+  {
+    "id": 10,
+    "name": "CAR10",
+    "quantity":10,
+    "description":"Best car ever 10",
+    "picture": "images/CAR10.jpeg",
+    "price": 20
+  },
+  {
+    "id": 11,
+    "name": "CAR11",
+    "quantity":11,
+    "description":"Best car ever 11",
+    "picture": "images/CAR11.jpeg",
+    "price": 21
+  },
+  {
+    "id": 12,
+    "name": "CAR12",
+    "quantity":12,
+    "description":"Best car ever 12",
+    "picture": "images/CAR12.jpeg",
+    "price": 22
+  },
+  {
+    "id": 13,
+    "name": "CAR13",
+    "quantity":13,
+    "description":"Best car ever 13",
+    "picture": "images/CAR13.jpeg",
+    "price": 23
+  },
+  {
+    "id": 14,
+    "name": "CAR14",
+    "quantity":14,
+    "description":"Best car ever 14",
+    "picture": "images/CAR14.jpeg",
+    "price": 24
+  },
+  {
+    "id": 15,
+    "name": "CAR15",
+    "quantity":15,
+    "description":"Best car ever 15",
+    "picture": "images/CAR15.jpeg",
+    "price": 25
+  }
+]
