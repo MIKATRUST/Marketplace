@@ -12,6 +12,10 @@ pragma solidity ^0.4.24;
         {
           using SafeMath for uint256;
 
+          //rapatrié de com
+          address public owner;
+          //bytes32 public name;
+
           uint256 count=0;
           /* Let's make sure everyone knows who owns the store.*/
           //address public store_owner;
@@ -83,13 +87,26 @@ pragma solidity ^0.4.24;
             }
 
           // !!!! TBD ? : réaliser le register du store vers la marketplace dans le construteur du store ?
-          constructor (bytes32 _name, address _marketplace, string _dataset) public {
-              store_dataset = _dataset;
-              marketplace_address = _marketplace;
+          constructor (address _owner, bytes32 _name)
+          public {
+              owner = _owner;
+              store_name = _name;
+
+              //store_dataset = "_dataset";
+              //marketplace_address = _marketplace;
               store_name = _name;
               emit LogCreate(store_name, msg.sender);
           }
 
+
+          function dummy()
+          public
+          pure
+          returns (uint)
+          {
+            return (42);
+          }
+/*
           function applyToMarketplace (address marketplaceAddr)
           public
           returns (uint256)
@@ -97,6 +114,7 @@ pragma solidity ^0.4.24;
             MarketplaceLogic myChoice = MarketplaceLogic(marketplaceAddr);
             return(myChoice.applyToMarketplace("toto"));
           }
+*/
 //store_name
           function nProductsForSale () public view returns (uint256 n){
             n = 0;

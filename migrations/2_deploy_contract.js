@@ -13,12 +13,12 @@ module.exports = function(deployer) {
 
   module.exports = function(deployer, network) {
     if (network == "development") {
-      deployer.deploy(StoreLogic, "Cars", 0x00, "cars");
-      deployer.deploy(Store, "Cars", 0x00, "cars");
+      deployer.deploy(StoreLogic, 0x00, "cars");
+      deployer.deploy(Store, 0x00, "cars");
       deployer.deploy(MarketplaceLogic);
     } else {
-      deployer.deploy(StoreLogic, "Cars", 0x00, "cars");
-      deployer.deploy(Store, "Cars", 0x00, "cars");
+      deployer.deploy(StoreLogic, 0x00, "cars");
+      deployer.deploy(Store, 0x00, "cars");
       deployer.deploy(MarketplaceLogic);
       // Perform a different step otherwise.
     }

@@ -1,254 +1,293 @@
 pragma solidity ^0.4.24;
 
+import "./StoreLogic.sol";
+
 contract MarketplaceLogic {
+//    administrators of marketplace
+//          >>Mapping of adminitrators of the Marketplace
+//          >>Array of admini
+//          mkt / manage administrator add/remove
+//          mkt / given address is administrator ?
+//          mkt / manage approved store owner add/remove (if rem -> del store)
+//          mkt / given address is approved store owner
+//          >>Mapping of approved store owner (rebuild)
+//          >>Array of approved owner
+//          >>Mapping of approved store owner >> mapping vers stores (for each)
+//          >>Array of stores
+//                    (rebuild each time a store is created/del)
+//                    delete storel array, then iteration sur approved store own
+//         /////// >>Array of store owner
+//         /////// >>Array of store for each approved store owner
+//          >>On a le max store index, par iteration manuel, on récup sto adres
+//          >>Mapping stores (uint vers store dont address)
+//
+//    approved store owner
+//          mkt / can create stores
+//          sto / can add/remove products
+//          sto / can change product price
+//          sto / can withdraw funds
+//    Shopper
+//          >>list of stores
+//          mkt / browse Storefront and select one
+//          sto / see product page for a given Storefront (including price, quantity)
+//          sto / purchase a product (hence debit customer account, update quantity in the store)
+//
 
-    /* Let's make sure everyone knows who owns the Markeplace. */
-    address public owner;
+    mapping (address => User) public Users;
+    address [] public iterUsers;
+    uint256 nUsers = 0;
+    uint256 nAdmin = 0; //number of admin for the marketplace
 
-    /* Who ami ? */
+    mapping (address => Store) public Stores;
+    address [] public iterStores;
+    bytes32 [] public storeNames;
+    uint256 idxIterStores = 0;
+    uint256 nStores = 0;
 
-    //For futur use
-    //mapping (address => bool) marketplaceAdmin;
-    //mapping (address => bool) storeOwners;
-    //mapping (address => bool) storeVisitors;
-
-    /* Fill in the keyword. Hint: We want to protect our users balance from other contracts*/
-
-    mapping (address => Store) public stores;
-
-    //Mapping/iterator of applicant stores
-    mapping (address => bool) public applicantStores;
-
-    //deprecated
-    //address [] public iterApplicantStore;
-    //address [] public applicantStores;
-    //address [] public acceptedStores;
-    //address [] public rejectedStore;
-    //address [] public suspendedStore;
-    //address [] public removedStore;
-
-    //mapping (address => Storefront[]) internal storesfronts;
-    address [] public iteratorStorefront;
-
-    /*Store index*/
-    uint256 StoreNumber;
-
-    /* business compliance */
-    uint256 public percentageMin = 7;
-    uint256 public percentageMax = 12;
-
-    /* Storefront is a struct */
-    struct Store {
-      address owner; //store soner = tx.origin
-      address location;
-      bytes32 name;
-      State state;
+    struct User {
+      RoleChoices role;
+      Store [] stores;
+      uint256 idxIterUsers;
       bool isValue;
     }
 
-    enum State {
-      ApplicationReceived,
-      ApplicationAccepted,
-      ApplicationRejected,
-      StoreSuspended,
-      StoreRemoved
+    struct Store {
+      bytes32 name;
+      uint256 idxIterStores;
+      bool isValue;
     }
 
-    /*Event*/
-      event LogApplicationReceived(address _sid);
-      event LogApplicationAccepted(address _sid);
-      event LogApplicationRejected(address _sid);
-      event LogStoreSuspended(address _sid);
-      event LogStoreRemoved(address _sid);
-      event myLog (string myString, address myAddress);
+    enum RoleChoices { Administrator, ApprovedStoreOwner, Shopper}
 
     /* Modifiers */
-
-    modifier doesNotExist(address sid)
-    {
-      require (
-        bool(stores[sid].isValue) == bool(false),
-        "store is already registed in the marketplace, store exists."
-      );
-      _;
-    }
-
-    modifier doesExist(address sid)
-    {
-      require (
-        bool(stores[sid].isValue) == bool(true),
-        "store is not registed in the marketplace, store does not exist."
-      );
-      _;
-    }
-
     modifier isNotAContract(){
     require (
-      msg.sender == tx.origin, "contracts are not allowed to interact.");
+      msg.sender == tx.origin,
+      "contracts are not allowed to interact.");
     _;
     }
 
-    modifier isAContract(){
-    require (
-      msg.sender != tx.origin, "contracts are not allowed to interact.");
-    _;
-    }
-
-    modifier applicationReceived(address _sid)
+    modifier isRegistered(address req)
     {
-        require(
-          uint(stores[_sid].state) == uint(State.ApplicationReceived),
-          "store state is not ApplicationReceive."
-        );
-        _;
+      require (Users[req].isValue == true,
+        "non registered user is not allowed to interact.");
+      _;
     }
-
-    modifier applicationAccepted(address _sid)
+    modifier isNotRegistered(address req)
     {
-        require(
-          uint(stores[_sid].state) == uint(State.ApplicationAccepted),
-          "store state is not ApplicationAccepted."
-        );
-        _;
+      require (
+        Users[req].isValue != true,
+        "registered user is not allowed to interact.");
+      _;
     }
-
-    modifier applicationRejected(address _sid)
+    modifier isAdministrator(address req)
     {
-        require(
-          uint(stores[_sid].state) == uint(State.ApplicationRejected),
-          "store state is not ApplicationRejected."
-        );
-        _;
+      require (
+        /*uint256(Users[req].role) == uint256(RoleChoices.Administrator)*/true,
+      "only administrator is allowed to interact.");
+      _;
     }
-
-    modifier storeSuspended(address _sid)
+    modifier isNotAdministrator(address req)
     {
-        require(
-          uint(stores[_sid].state) == uint(State.StoreSuspended),
-          "store state is not StoreSuspended."
-        );
-        _;
+      require (Users[req].role != RoleChoices.Administrator,
+      "administrator is not allowed to interact.");
+      _;
     }
-
-    modifier storeRemoved(address _sid)
+    modifier isApprovedStoreOwner(address req)
     {
-        require(
-          uint(stores[_sid].state) == uint(State.StoreRemoved),
-          "store state is not StoreSuspended."
-        );
-        _;
+      require (uint256(Users[req].role) == uint256(RoleChoices.ApprovedStoreOwner),
+        "only ApprovedStoreOwner is allowed to interact.");
+      _;
     }
-
-    //Add event Log
-    //To be done
-
-    constructor () public {
-        /* Set the owner to the creator of this contract */
-        //owner = msg.sender;
-        StoreNumber = 0;
-    }
-
-    function whoAmI()
-      public
-      returns (uint)
+    modifier isNotApprovedStoreOwner(address req)
     {
-      //Admin .
-      //StoreOwner ?
-      //Visitor
+      require (uint256(Users[req].role) != uint256(RoleChoices.ApprovedStoreOwner),
+        "approvedStoreOwner is not allowed to interact.");
+      _;
+    }
+    modifier notForMyself(address req)
+    {
+      require (msg.sender != req,
+        "ask somebody else to perform this action.");
+      _;
+    }
+    modifier atLeast1Admin()
+    {
+      require (nAdmin > 1,
+        "can not remove last Administrator.");
+      _;
+    }
+    // Events - publicize actions to external listeners
+    event LogNewMarketplace(address _req);
+    event LogAdminAdded(address _req, address _user);
+    event LogAdminDeleted(address _req, address _user);
+    event LogApprStoreOwnerAdded(address _req, address _user );
+    event LogApprStoreOWnerDeleted(address _req, address _user);
+    event LogNewStore(address _req, address _store);
+    event LogStoreDeleted(address _req, address _store);
+
+    event myLog (string myString, address myAddress);
+
+    constructor()
+    public
+    isNotAContract()
+    {
+      Users[msg.sender].role = RoleChoices.Administrator;
+      Users[msg.sender].idxIterUsers = nUsers;
+      Users[msg.sender].isValue = true;
+      iterUsers.push(msg.sender);
+      nAdmin++;
+      nUsers++;
+      emit LogNewMarketplace(msg.sender);
+      emit LogAdminAdded(msg.sender, tx.origin);
     }
 
-    function applyToMarketplace(bytes32 storeName)
-      public
-      //isAContract
-      isNotAContract()
-      doesNotExist(msg.sender)
-      returns (uint256)
+    function addAdmin (address user)
+    public
+    isAdministrator (msg.sender)
+    isNotRegistered (user)
     {
-      //Function to be called by the constructor of the store
-
-      emit myLog ("*tx.origin = ", tx.origin);
-      emit myLog ("*msg.sender = ", msg.sender);
-      //Fill the store information
-      Store memory store;
-      store.owner = tx.origin;
-      store.location = msg.sender;
-      store.name = storeName;
-      store.state = State.ApplicationReceived;
-      store.isValue = true;
-      stores[msg.sender] = store;
-      //fill applicantStore
-      //applicantStore[msg.sender] = true;
-      //iterApplicantStore.push(msg.sender);
-      emit LogApplicationReceived(msg.sender);
-        //deprecated
-        //applicantStores.push(msg.sender);
-      return(uint(1));
-    }
-/*
-    function getApplicantStores()
-      public
-      //onlyOwner
-      returns (address[])
-    {
-      //itérer sur stores
-      //build applicantStores
-      //return applicantStores; // ie : store with state == ApplicationReceived
-    }
-*/
-    function acceptApplicantStore(address sid)
-      public
-
-      //doesExist(sid)
-      applicationReceived(sid)
-      // TBD
-      //onlyMArketplaceOwner
-    {
-      stores[sid].state = State.ApplicationAccepted;
-      emit LogApplicationAccepted(sid);
+      Users[user].role = RoleChoices.Administrator;
+      Users[user].idxIterUsers = nUsers;
+      Users[user].isValue = true;
+      iterUsers.push(user);
+      nAdmin++;
+      nUsers++;
+      emit LogAdminAdded(user, user);
     }
 
-    function rejectApplicantStore(address sid)
-      public
-      //doesExist(sid)
-      applicationReceived(sid)
-      //only Marketplace Owner
+    function deleteAdmin (address user)
+    public
+    notForMyself(user)
+    isRegistered (msg.sender)
+    isAdministrator (msg.sender)
+    isRegistered (user)
+    isAdministrator (user)
+    atLeast1Admin ()
     {
-      stores[sid].state = State.ApplicationRejected;
-      emit LogApplicationRejected(sid);
+      deleteUser (user);
+      nAdmin--;
+      //nUsers--; //we never remove, because used like index for iterUsers
+      emit LogAdminDeleted(msg.sender, user);
     }
 
-    function suspendStore(address sid)
-      public
-      //doesExist(sid)
-      applicationAccepted(sid)
-      //only Marketplace Owner
+    function addAprovedStoreOwner (address user)
+    isAdministrator (msg.sender)
+    isNotRegistered (user)
+    public
     {
-      stores[sid].state = State.StoreSuspended;
-      emit LogStoreSuspended(sid);
+      Users[user].role = RoleChoices.ApprovedStoreOwner;
+      Users[user].idxIterUsers = nUsers;
+      Users[user].isValue = true;
+      iterUsers.push(user);
+      nUsers++;
+      emit LogApprStoreOwnerAdded(user, user);
     }
 
-    function removeStore(address sid)
-      public
-      //doesExist(sid)
-      applicationAccepted(sid)
-      //only store owner
+    function deleteApprovedStoredOwner (address user)
+    isRegistered (msg.sender)
+    isAdministrator (msg.sender)
+    isRegistered (user)
+    isApprovedStoreOwner (user)
+    public
     {
-      stores[sid].state = State.StoreRemoved;
-      emit LogStoreRemoved(sid);
+      deleteUser(user);
+      emit LogApprStoreOWnerDeleted(msg.sender, user);
     }
 
-    function getAcceptedStores()
-      public
-      //returns array address
-      //returns (address[])
+    function deleteUser (address user)
+    internal
     {
-      //for, cosntruct array, return it
+      delete iterUsers[Users[user].idxIterUsers];
+      delete Users[user];
+      //nUsers--; No because it is used with index
     }
 
-    function getState(address sid)
-      public
-      returns (uint256)
+    function getUserRole(address user)
+    public
+    view
+    returns (uint256)
     {
-      return(uint256(stores[sid].state));
+      if(Users[user].isValue == true){
+        if(uint256(Users[user].role) == uint256(RoleChoices.Administrator)){
+          return (uint256(RoleChoices.Administrator));
+        } else {
+          return (uint256(RoleChoices.ApprovedStoreOwner));
+        }
+      }
+      else{
+        return (uint256(RoleChoices.Shopper));
+      }
+
+    }
+
+    function userExists (address user, RoleChoices role)
+    public
+    view
+    returns(bool)
+    {
+      return (Users[user].isValue && (Users[user].role == role));
+          //vérifier la mécanique générale dans les tests
+          // Users[user].isValue
+          // (iterUsers[Users[user].idxIterUsers] == user)
+    }
+
+    function getStoresNum ()
+    public
+    view
+    returns(uint)
+    {
+      return (nStores);
+    }
+
+    function getStores ()
+    public
+    view
+    returns (address [], bytes32[])
+    {
+      return(iterStores, storeNames);
+    }
+
+    function createStore(bytes32 name)
+    public
+    isNotAContract()
+    isApprovedStoreOwner(msg.sender)
+    returns (address)
+    {
+      address storeAddress = new StoreLogic(msg.sender, name);
+
+      Stores[storeAddress].name = name;
+      Stores[storeAddress].isValue = true;
+      Stores[storeAddress].idxIterStores = nStores;
+      iterStores.push(storeAddress);
+      storeNames.push(name);
+      nStores++;
+      emit LogNewStore(msg.sender, storeAddress);
+      return storeAddress;
+    }
+
+    //TBD RAF delete store
+
+    // Fallback function - Called if other functions don't match call or
+    // sent ether without data
+    // Typically, called when invalid data is sent
+    // Added so ether sent to this contract is reverted if the contract fails
+    // otherwise, the sender's money is transferred to contract
+    function () public {
+      revert();
     }
 }
+
+/*
+mapping (address => Store) public Stores;
+address [] public iterStores;
+uint256 idxIterStores = 0;
+uint256 nStores = 0;
+
+Users[msg.sender].role = RoleChoices.Administrator;
+Users[msg.sender].isValue = true;
+iterUsers.push(msg.sender);
+nAdmin++;
+nUsers++;
+emit LogAdminAdded(msg.sender, user);
+*/

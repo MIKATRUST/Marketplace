@@ -2,131 +2,133 @@
 const MarketplaceLogic = artifacts.require("MarketplaceLogic");
 const StoreLogic = artifacts.require("StoreLogic");
 
-contract('Marketplace Logic js tests', async (accounts) => {
+//var marketplaceAddr = "";
 
-  const owner = accounts[0]; //Marketplace owner
-  const alice = accounts[1];
-  const bob = accounts[2];
-  const alexia = accounts[3];
-  const georges = accounts[4];
-  const arthur = accounts[5];
+contract('marketplaceLogic js tests', async (accounts) => {
 
-  const marketplaceAddr = 0xa43bd34038ca13e7115e16770d722e62ea706212;
+  const admin1 = accounts[0]; //Marketplace owner & Administrator
+  const admin2 = accounts[1];
+  const appStoreOwner1 = accounts[2];
+  const appStoreOwner2 = accounts[3];
 
   let tryCatch = require("./exceptions.js").tryCatch;
   let errTypes = require("./exceptions.js").errTypes;
 
-  it("store must be able to applicate to the marketplace.", async () => {
+  it("constructor instanciator should have the role Admnistrator", async () => {
+    instance = await MarketplaceLogic.deployed();
+    let role = await instance.getUserRole(admin1);
+    assert.equal(role, 0 /*RoleChoices.Administrator*/,
+    "instanciator of the marketplace should also be administrator, check constructor and method getUserRole.");
+  })
+
+/*
+event LogNewMarketplace(address _req);
+event LogAdminAdded(address _req, address _user);
+event LogAdminDeleted(address _req, address _user);
+event LogApprStoreOwnerAdded(address _req, address _user );
+event LogApprStoreOWnerDeleted(address _req, address _user);
+event LogNewStore(address _req, address _store);
+event LogStoreDeleted(address _req, address _store);
+*/
+
+  it("add Administrator.", async () => {
     let instance = await MarketplaceLogic.deployed();
-    let instanceStore = await StoreLogic.deployed();
-
-    //instanceStore.applyToMarketplace("toto");
-
-    const expectedEventResult = {_sid:alice};
-    const LogApplicationReceivedMade = await instance.LogApplicationReceived();
-
-    //var event = supplyChain.ForSale()
-
-    await instance.applyToMarketplace("truck1",{from : alice});
-    //deprecated
-    //let value = await instance.getApplicantStores.call();
-    //assert.equal(value.length, 1, "marketplace must have 1 applicant store.");
-
-    //TBD : assert.equal(instance.stores[alice].state, instance.State.ApplicationReceived, "store state must be ApplicationReceived.");
-
+    const LogMade = await instance.LogAdminAdded();
+    await instance.addAdmin (admin2,{from:admin1});
+    const expectedLog = {_user:admin2};
     const log = await new Promise(function(resolve, reject) {
-        LogApplicationReceivedMade.watch(function(error, log){ resolve(log);});
+        LogMade.watch(function(error, log){ resolve(log);});
     });
-    const logStoreAddress = log.args._sid;
-    assert.equal(expectedEventResult._sid, logStoreAddress, "LogApplicationReceivedMade event _sid property not emmitted, check applyToMarketplace method");
+    assert.equal(expectedLog._user, log.args._user,
+      "LogAdminAdded made, event _user property not emmitted, check addAdmin method.");
 
-  })
+//    instance = await MarketplaceLogic.deployed();
+//    await instance.addAdmin(Administrator2,{from : marketplaceOwner});
+//    assert.equal()
+//    let role = await instance.getUserRole(Administrator2);
+//    assert.equal(role, 0 /*RoleChoices.Administrator*/,
+//      "Administrator should be able to add administrator.");
 
-  it("store must not be able to applicate 2 times to the marketplace.", async () => {
-    let instance = await MarketplaceLogic.deployed();
-    await tryCatch(instance.applyToMarketplace("truck1",{from : alice}), errTypes.revert);
-  })
+    //await tryCatch(instance.addAdmin(Administrator2), errTypes.revert);
+    //addAprovedStoreOwner
+ })
 
-  it("marketplace owner must be able to accept the application of a store.", async () => {
-    let instance = await MarketplaceLogic.deployed();
+ it("delete Administrator", async () => {
+   let instance = await MarketplaceLogic.deployed();
+   const LogMade = await instance.LogAdminDeleted();
+   await instance.deleteAdmin (admin2,{from:admin1});
+   const expectedLog = {_user:admin2};
+   const log = await new Promise(function(resolve, reject) {
+     LogMade.watch(function(error, log){ resolve(log);});
+   });
+   assert.equal(expectedLog._user, log.args._user,
+   "LogAdminDeleted made, event _user property not emmitted, check deleteAdmin method");
+ })
 
-    const expectedEventResult = {_sid:alexia};
-    const LogApplicationAcceptedMade = await instance.LogApplicationAccepted();
+ it("add approved store owner.", async () => {
+   let instance = await MarketplaceLogic.deployed();
+   const LogMade = await instance.LogApprStoreOwnerAdded();
+   await instance.addAprovedStoreOwner (appStoreOwner1,{from:admin1});
+   const expectedLog = {_user:appStoreOwner1};
+   const log = await new Promise(function(resolve, reject) {
+       LogMade.watch(function(error, log){ resolve(log);});
+   });
+   assert.equal(expectedLog._user, log.args._user,
+     "LogApprStoreOwnerAdded made, event _user property not emmitted, check addAprovedStoreOwner method.");
+ })
 
-    await instance.acceptApplicantStore(alexia,{from : owner});
-    let theState = await instance.getState.call(alexia,{from : owner});
-    assert.equal(theState, 1/*ApplicationAccepted*/, "state must be ApplicationAccepted.");
+ it("create 3 stores", async () => {
+   let instance = await MarketplaceLogic.deployed();
+   const result1 = await instance.createStore("Cars",{from : appStoreOwner1});
+   const result2 = await instance.createStore("Bikes",{from : appStoreOwner1});
+   const result3 = await instance.createStore("TRuck",{from : appStoreOwner1});
+   //if needed, have a look at the results of teh transactionwe
+   //console.log(result.tx); console.log(result.logs);console.log(result.receipt);
 
-    const log = await new Promise(function(resolve, reject) {
-        LogApplicationAcceptedMade.watch(function(error, log){ resolve(log);});
-    });
-    const logStoreAddress = log.args._sid;
-    assert.equal(expectedEventResult._sid, logStoreAddress, "LogApplicationAcceptedMade event _sid property not emmitted, check acceptApplicantStore method");
-  })
+   //TBD : check also event name
+   const adrStore = result1.logs[0].args._store; //console.log("address of the new store : "+adrStore);
+   var instanceStoreLogic = await StoreLogic.at(adrStore);
 
-  it("marketplace owner must be able to reject the application of a store.", async () => {
-    let instance = await MarketplaceLogic.deployed();
+   assert.equal(await instance.getStoresNum(), 3, "marketplace should have 3 stores");
+   assert.equal(await instanceStoreLogic.dummy(), 42, "should get the magic number from an instanciated store, otherwise store was not created. check constructore of StoreLogic");
+   })
 
-    const expectedEventResult = {_sid:georges};
-    const LogApplicationRejectedMade = await instance.LogApplicationRejected();
 
-    await instance.rejectApplicantStore(georges,{from : owner});
-    let theState = await instance.getState.call(georges,{from : owner});
-    assert.equal(theState, 2/*ApplicationRejected*/,"state must be ApplicationRejected.");
-
-    const log = await new Promise(function(resolve, reject) {
-        LogApplicationRejectedMade.watch(function(error, log){ resolve(log);});
-    });
-    const logStoreAddress = log.args._sid;
-    assert.equal(expectedEventResult._sid, logStoreAddress, "LogApplicationRejectedMade event _sid property not emmitted, check rejectApplicantStore method");
-
-  })
-
-  it("marketplace owner must be able to suspend a store whose application has been accepted.", async () => {
-    let instance = await MarketplaceLogic.deployed();
-
-    const expectedEventResult = {_sid:alexia};
-    const LogStoreSuspendedMade = await instance.LogStoreSuspended();
-
-    let theState = await instance.getState.call(alexia,{from : owner});
-    assert.equal(theState, 1/*ApplicationAccepted*/, "state must be ApplicationAccepted.");
-    await instance.suspendStore(alexia,{from : owner});
-    let stateSuspended = await instance.getState.call(alexia,{from : owner});
-    assert.equal(stateSuspended, 3/*StoreSuspended*/,"state must be StoreSuspended.");
-
-    const log = await new Promise(function(resolve, reject) {
-        LogStoreSuspendedMade.watch(function(error, log){ resolve(log);});
-    });
-    const logStoreAddress = log.args._sid;
-    assert.equal(expectedEventResult._sid, logStoreAddress, "LogStoreSuspendedMade event _sid property not emmitted, check suspendStore method");
-  })
-
-  it("store owner must be able to remove the store from the marketplace.", async () => {
-    let instance = await MarketplaceLogic.deployed();
-
-    const expectedEventResult = {_sid:bob};
-    const LogStoreRemovedMade = await instance.LogStoreRemoved();
-
-    await instance.applyToMarketplace("truck1",{from : bob});
-    await instance.acceptApplicantStore(bob,{from : owner});
-    let stateAccepted = await instance.getState.call(bob,{from : owner});
-    assert.equal(stateAccepted, 1/*ApplicationAccepted*/, "state must be ApplicationAccepted.");
-    await instance.removeStore(bob,{from : bob});
-    let stateRemoved = await instance.getState.call(bob,{from : owner});
-    assert.equal(stateRemoved, 4/*StoreRemoved*/,"state must be StoreRemoved.");
-
-    const log = await new Promise(function(resolve, reject) {
-        LogStoreRemovedMade.watch(function(error, log){ resolve(log);});
-    });
-    const logStoreAddress = log.args._sid;
-    assert.equal(expectedEventResult._sid, logStoreAddress, "LogStoreRemoveddMade event _sid property not emmitted, check removeStore method");
-
-  })
+it("retrieve stores", async () => {
+  let instance = await MarketplaceLogic.deployed();
+  let Stores = await instance.getStores ();
+  assert.equal(Stores[0].length, 3, "marketplace should have 3 stores, check method getStores.");
+  assert.equal(Stores[0].length,Stores[1].length,"should get complet information for the 3 stores");
+  //console.log("***"+(Stores[1][0]).toAsc);
+  //let toto = web3.utils.toHex("Cars");
+  //let tata = web3.utils.hexToAscii(Stores[1][0]);
+  //console.log("**"+tata);
+  //console.log("*"+toto);
+  //assert.equal(Stores[1][0],toto,"bad mood");
+})
 
 
 /*
-it("somebody must be able to get the array of accepted store.", async () => {
-getOpenStores()  !!! duplicate avec getApplicantStores ? à factoriser ?
+const result = await supplyChain.fetchItem.call(sku)
+assert.equal(result[0], name, 'the name of the last added item does not match the expected value')
+assert.equal(result[2].toString(10), price, 'the price of the last added item does not match the expected value')
+assert.equal(result[3].toString(10), 0, 'the stat
 */
+
+
+ it("delete approved store owner.", async () => {
+   let instance = await MarketplaceLogic.deployed();
+   const LogMade = await instance.LogApprStoreOWnerDeleted();
+   await instance.deleteApprovedStoredOwner (appStoreOwner1,{from:admin1});
+   const expectedLog = {_user:appStoreOwner1};
+   const log = await new Promise(function(resolve, reject) {
+       LogMade.watch(function(error, log){ resolve(log);});
+   });
+   assert.equal(expectedLog._user, log.args._user,
+     "LogApprStoreOWnerDeleted made, event _user property not emmitted, check deleteApprovedStoredOwner method.");
+
+     ///TBD problem with modifier is administrat
+
+ })
 
 })

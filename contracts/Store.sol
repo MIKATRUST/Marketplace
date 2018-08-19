@@ -16,14 +16,22 @@ contract Store is
   Pausable,
   Destructible,
   PullPayment,
-  StoreLogic  {
+  StoreLogic
+  {
 
+  constructor (address _owner, bytes32 _name)
+    public
+    StoreLogic(_owner, _name)
+    {
+    }
+
+/*
   constructor (bytes32 _name, address _marketplace, string _dataset)
     public
     StoreLogic(_name, _marketplace, _dataset)
     {
     }
-
+*/
   function heartBeatPausable()
     //onlyOwner
     whenNotPaused //function won't be callable when the contract is in the paused state
