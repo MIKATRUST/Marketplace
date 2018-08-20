@@ -1,13 +1,60 @@
 pragma solidity ^0.4.24;
 
+// Strategy for using event injavascript
+//https://ethereum.stackexchange.com/questions/39171/how-to-check-events-in-truffle-tests
+
 import "truffle/Assert.sol";
 import "truffle/DeployedAddresses.sol";
-import "./../contracts/StoreLogic.sol";
+import "./../contracts/StoreCrud.sol";
 
-contract TestStoreLogic {
+contract TestStoreCrud {
 
-  StoreLogic storelogic = StoreLogic(DeployedAddresses.StoreLogic());
+  StoreCrud storecrud = StoreCrud(DeployedAddresses.StoreCrud());
+  uint index;
 
+  function testInsertStore() public {
+    storecrud.insertStore(0x01,"store 1");
+    storecrud.insertStore(0x02,"store 2");
+    storecrud.insertStore(0x03,"store 3");
+    storecrud.insertStore(0x04,"store 4");
+    storecrud.insertStore(0x05,"store 5");
+    //try insert already existing store, tbd with js
+    Assert.equal(uint256(5), storecrud.getStoreCount(), "5 stores inserted correctly.");
+  }
+
+  function testGetStore() public {
+    bytes32 recStoreName;
+    bytes32 expectedStoreName = "store 2";
+    //try request not a store, tbd with js
+    (recStoreName, index) = storecrud.getStore(0x02);
+    Assert.equal(bytes32(recStoreName), bytes32(expectedStoreName), "recovered and expected storeName should match");
+  }
+
+
+  function testGetStoreAtIndex() public {
+    address expectedStoreAddress = 0x02;
+    address recStoreAddress = storecrud.getStoreAtIndex(index);
+    Assert.equal(recStoreAddress, expectedStoreAddress, "recovered and expected storeName should match");
+  }
+
+  function testDeleteStore() public {
+    storecrud.deleteStore(0x01);
+    storecrud.deleteStore(0x05);
+    // try delete not a store, tbd with js
+    Assert.equal(uint256(3), storecrud.getStoreCount(), "3 stores remaining.");
+
+  }
+
+  function testStoreCount() public {
+    storecrud.deleteStore(0x02);
+    storecrud.deleteStore(0x03);
+    storecrud.deleteStore(0x04);
+    Assert.equal(uint256(0), storecrud.getStoreCount(), "0 store remaining.");
+  }
+
+}
+
+/*
   function testHeartBeat() public {
     uint n = storelogic.heartBeat();
     Assert.equal(uint(n), uint(2), "heartBeat, Not 2.");
@@ -149,3 +196,4 @@ contract TestStoreLogic {
 
 
  }
+ */

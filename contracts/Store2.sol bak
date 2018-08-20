@@ -12,23 +12,45 @@ pragma solidity ^0.4.24;
         {
           using SafeMath for uint256;
 
-          //rapatrié de com
-          address public owner;
-          //bytes32 public name;
 
-          uint256 count=0;
-          /* Let's make sure everyone knows who owns the store.*/
-          //address public store_owner;
-          /* Let's give a name to the store */
+//////////
+          mapping (address => User) public Users;
+          address [] public iterUsers;
+          uint256 nUsers = 0;
+          uint256 nAdmin = 0; //number of admin for the marketplace
+
+          mapping (address => Store) public Stores;
+          address [] public iterStores;
+          bytes32 [] public storeNames;
+          uint256 idxIterStores = 0;
+          uint256 nStores = 0;
+
+          struct User {
+            RoleChoices role;
+            Store [] stores;
+            uint256 idxIterUsers;
+            bool isValue;
+          }
+
+          struct Store {
+            bytes32 name;
+            uint256 idxIterStores;
+            bool isValue;
+          }
+///////////
+
+
+          //let's define product
+          uint256[] id;
+          bytes32[] name;
+          uint256[] quantity;
+          bytes32[] description;
+          uint256[] price;
+          bo
+
+          //name of teh store
           bytes32 public store_name;
 
-          /* store balance TO REMOVE ??*/
-          uint256 private store_balance;
-
-          /*dataset to load ?*/
-          string store_dataset;
-          /*address of the marketplace to register*/
-          address marketplace_address;
           /* Well we sell products */
           mapping (uint256 => Product) public products;
           /* Well we have customers */
@@ -48,8 +70,8 @@ pragma solidity ^0.4.24;
           }
 
           // Events - publicize actions to external listeners
-          event LogCreate(bytes32 storeName, address byAddress);
-          event LogDelete(bytes32 storeName, address byAddress); // not used yet
+          event LogConstructorStoreLogic(bytes32 storeName, address byAddress);
+          event LogDeleteStore(bytes32 storeName, address byAddress); // not used yet
           event LogAddProduct(bytes32 storeName, uint256 id, bytes32 name);
           event LogRemoveProduct(bytes32 storeName, uint256 id, bytes32 name);
           event LogUpdatePrice(bytes32 storeName, uint256 id, uint256 oldPrice, uint256 newPrice);
@@ -91,31 +113,9 @@ pragma solidity ^0.4.24;
           public {
               owner = _owner;
               store_name = _name;
-
-              //store_dataset = "_dataset";
-              //marketplace_address = _marketplace;
-              store_name = _name;
-              emit LogCreate(store_name, msg.sender);
-          }
-
-
-          function dummy()
-          public
-          pure
-          returns (uint)
-          {
-            return (42);
+              emit LogConstructorStoreLogic(store_name, msg.sender);
           }
 /*
-          function applyToMarketplace (address marketplaceAddr)
-          public
-          returns (uint256)
-          {
-            MarketplaceLogic myChoice = MarketplaceLogic(marketplaceAddr);
-            return(myChoice.applyToMarketplace("toto"));
-          }
-*/
-//store_name
           function nProductsForSale () public view returns (uint256 n){
             n = 0;
             uint256 i = 0;
@@ -125,14 +125,6 @@ pragma solidity ^0.4.24;
             return n;
           }
 
-          function heartBeat ()
-            public
-            pure
-            returns (uint256)
-            {
-            return uint256(2);
-            }
-
           function useSub()
             public
             pure
@@ -140,7 +132,7 @@ pragma solidity ^0.4.24;
             {
               return uint256(10).sub(uint256(5));
             }
-
+*/
 
           function addProduct (bytes32 _name, uint256 _quantity, bytes32 _description, uint256 _price)
               public
@@ -193,29 +185,7 @@ pragma solidity ^0.4.24;
             products[id].description = _description;
             emit LogUpdateDescription(store_name, id, oldDescription, _description);
           }
-/*
-          function purchaseProduct (uint256 id, uint256 quantity)
-          public
-          payable
-          forSale (id)
-          enoughStock (id, quantity)
-          paidEnough(id, quantity)
-          giveBackChange(id, quantity)
-          {
-            //update quantity in store
-            products[id].quantity = products[id].quantity.sub(quantity);
-            //put payment is escrow
-            //asyncTransfer(owner, (products[id].price).mul(quantity));
 
-            emit LogPurchaseProduct(id, quantity, (quantity.mul(products[id].price)), msg.sender);
-          }
-*/
-/*
-          function withdrawReceivedPayments ()
-            public
-            {
-              withdrawPayments();
-            }
 */
           function identicalProduct
             (uint256 _id1, bytes32 _name1, bytes32 _description1, uint256 _price1,

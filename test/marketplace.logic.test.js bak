@@ -79,14 +79,15 @@ event LogStoreDeleted(address _req, address _store);
 
  it("create 3 stores", async () => {
    let instance = await MarketplaceLogic.deployed();
-   const result1 = await instance.createStore("Cars",{from : appStoreOwner1});
-   const result2 = await instance.createStore("Bikes",{from : appStoreOwner1});
-   const result3 = await instance.createStore("TRuck",{from : appStoreOwner1});
+   const result1 = await instance.createStoreLogic("Cars",{from : appStoreOwner1});
+   const result2 = await instance.createStoreLogic("Bikes",{from : appStoreOwner1});
+   const result3 = await instance.createStoreLogic("Trucks",{from : appStoreOwner1});
    //if needed, have a look at the results of teh transactionwe
    //console.log(result.tx); console.log(result.logs);console.log(result.receipt);
 
    //TBD : check also event name
    const adrStore = result1.logs[0].args._store; //console.log("address of the new store : "+adrStore);
+
    var instanceStoreLogic = await StoreLogic.at(adrStore);
 
    assert.equal(await instance.getStoresNum(), 3, "marketplace should have 3 stores");

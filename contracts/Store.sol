@@ -1,140 +1,128 @@
 pragma solidity ^0.4.24;
 
-//Marketplace Material to look for : https://github.com/MShah890/Ethereum-MarketPlace/blob/master/Blockchain%20Backend/contracts/MarketPlace.sol
-//Contract acceptin erc20 : https://programtheblockchain.com/posts/2018/02/27/writing-a-token-market-contract/
-//Separate eternal storage and app logic : https://blog.colony.io/writing-upgradeable-contracts-in-solidity-6743f0eecc88
-//Dynamic Dummy image generator : https://dummyimage.com/
-
-import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
-import 'openzeppelin-solidity/contracts/lifecycle/Pausable.sol';
-import 'openzeppelin-solidity/contracts/lifecycle/Destructible.sol';
+//import "./Marketplace.sol";
+//import "./LCrud.sol";
+import "./../contracts/ItemCrud.sol";
+import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 import 'openzeppelin-solidity/contracts/payment/PullPayment.sol';
-import "./StoreLogic.sol";
 
 contract Store is
-  Ownable,
-  Pausable,
-  Destructible,
-  PullPayment,
-  StoreLogic
-  {
+ItemCrud,
+PullPayment
+ {
+    using SafeMath for uint256;
+    address public owner; // store owner
 
-  constructor (address _owner, bytes32 _name)
-    public
-    StoreLogic(_owner, _name)
-    {
+    //Events
+    //To be done
+
+    //Modifiers
+    modifier giveBackChange(uint256 _productSku, uint256 _productQuantity) {
+    //refund them after pay for item (why it is before, _ checks for logic before func)
+    _;
+    (,,,uint productPrice,,) = getProduct(_productSku);
+    msg.sender.transfer(msg.value - productPrice.mul(_productQuantity));
     }
 
-/*
-  constructor (bytes32 _name, address _marketplace, string _dataset)
+    constructor()
     public
-    StoreLogic(_name, _marketplace, _dataset)
+    ItemCrud()
+    PullPayment()
     {
-    }
-*/
-  function heartBeatPausable()
-    //onlyOwner
-    whenNotPaused //function won't be callable when the contract is in the paused state
-    public
-    view
-    returns (uint)
-      {
-        return (super.heartBeat());
-      }
-
-  function heartBeatOnlyOwner()
-    onlyOwner
-    //whenNotPaused //function won't be callable when the contract is in the paused state
-    public
-    view
-    returns (uint)
-    {
-        return (super.heartBeat());
+      owner = tx.origin; // à refacto avec ownable
     }
 
-/*
-  function buySth1Ether(uint256 _id)
-    payable
+    function isAvailable()
     public
-      {
-      //test purpose, skipping verification
-      uint256 amount = 1 ether;
-      uint256 remAmount = msg.value - amount;
-      asyncTransfer(owner, amount);
-      msg.sender.transfer(remAmount);
-      }
-*/
-  //function withdrawReceivedPayments ()
-
-  function withdrawPayments()
-    public
-    onlyOwner
-    whenNotPaused
-      {
-        super.withdrawPayments();
-      }
-
-  //TBD, add require no more ether in the contract
-  //function destroy()
-
-  function purchaseProduct (uint256 id, uint256 quantity)
-    public
-    payable
-    whenNotPaused
-    {
-      asyncTransfer(owner, ((products[id].price).mul(quantity)));
-      msg.sender.transfer(msg.value - ((products[id].price).mul(quantity)));
-    }
-
-  function removeProduct (uint256 id)
-    public
-    onlyOwner
-    whenNotPaused
-    {
-      super.removeProduct (id);
-    }
-
-  function addProduct (bytes32 _name, uint256 _quantity, bytes32 _description, uint256 _price)
-    public
-    onlyOwner
-    whenNotPaused
-    returns (uint)
-    {
-      return (super.addProduct (_name, _quantity, _description, _price));
-    }
-
-  function updatePrice (uint256 id, uint256 _price)
-    public
-    onlyOwner
-    whenNotPaused
-    {
-      super.updatePrice (id, _price);
-    }
-
-  function updateQuantity (uint256 id, uint256 _quantity)
-    public
-    onlyOwner
-    whenNotPaused
-    {
-      super.updateQuantity (id, _quantity);
-    }
-  function updateDescription (uint256 id, bytes32 _description)
-    public
-    onlyOwner
-    whenNotPaused
-    {
-      super.updateDescription (id, _description);
-    }
-
-  function productIsForSale (uint256 id)
-    public
-    view
-    onlyOwner
-    whenNotPaused
+    pure
     returns (bool)
     {
-      if(isForSale[id]==true)return true;
-      else return false;
+      return (true);
     }
+
+    function purchaseProduct (uint256 productSku, uint256 productPurchaseQty)
+    public
+    payable
+//    forSale (id)
+//    enoughStock (id, quantity)
+//    paidEnough(id, quantity)
+    giveBackChange(productSku, productPurchaseQty)
+    {
+      //update quantity in store
+      //get quantity
+      //calculate remianing > updata quantity
+
+      (,uint productQty,,uint productPrice,,) = getProduct(productSku);
+
+      updateProductQuantity (productSku, productQty.sub(productPurchaseQty));
+      //bool ret = updateProductQuantity (productSku,uint(3));
+
+      super.asyncTransfer(owner,(productPurchaseQty).mul(productPrice));
+
+      //emit LogPurchaseProduct(id, quantity, (quantity.mul(products[id].price)), msg.sender);
+    }
+
+    function withdrawPayments ()
+    public
+    {
+      super.withdrawPayments();
+    }
+
+    function addProduct(uint productSku,bytes32 productName,uint productQuantity,bytes32 productDescription,uint productPrice,bytes32 productImage)
+    public
+    returns(uint)
+    {
+      uint index= super.insertItem(productSku,productName,productQuantity,productDescription,productPrice,productImage);
+      //emit LogAddProduct(store_name, id, _name);
+      return(index);
+    }
+
+    function removeProduct(uint productSku)
+    public
+    returns(uint)
+    {
+      uint index=super.deleteItem(productSku);
+      //emit LogRemoveProduct(store_name, id, products[id].name);
+      return(index);
+    }
+
+    function getProductCount()
+    public
+    constant
+    returns(uint count)
+    {
+      return super.getItemCount();
+    }
+
+    function getProduct(uint productSku)
+      public
+      //sku exists
+      constant
+      returns(bytes32 productName, uint productQuantity, bytes32 productDescription, uint productPrice, bytes32 prouctImage, uint index)
+    {
+      return(super.getItem(productSku));
+    }
+
+    function getProductAtIndex(uint index)
+      public
+      constant
+      returns(uint productSku)
+    {
+      return (super.getItemAtIndex(index));
+    }
+
+    function updateProductPrice (uint productSku, uint productPrice)
+    public
+    returns(bool success)
+    {
+      return(super.updateItemPrice(productSku, productPrice));
+    }
+
+    function updateProductQuantity (uint productSku, uint256 productQuantity) public
+    returns(bool success)
+    {
+      return(super.updateItemQuantity(productSku, productQuantity));
+    }
+
 
 }

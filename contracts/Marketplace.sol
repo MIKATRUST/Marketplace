@@ -1,41 +1,70 @@
 pragma solidity ^0.4.24;
 
-import "./StoreLogic.sol";
+import "./../contracts/StoreCrud.sol";
+import "./Store.sol";
+//import 'openzeppelin-solidity/contracts/ownership/rbac/RBAC.sol';
+//import 'openzeppelin-solidity/contracts/payment/PullPayment.sol';
 
-contract MarketplaceLogic {
-//    administrators of marketplace
-//          >>Mapping of adminitrators of the Marketplace
-//          >>Array of admini
-//          mkt / manage administrator add/remove
-//          mkt / given address is administrator ?
-//          mkt / manage approved store owner add/remove (if rem -> del store)
-//          mkt / given address is approved store owner
-//          >>Mapping of approved store owner (rebuild)
-//          >>Array of approved owner
-//          >>Mapping of approved store owner >> mapping vers stores (for each)
-//          >>Array of stores
-//                    (rebuild each time a store is created/del)
-//                    delete storel array, then iteration sur approved store own
-//         /////// >>Array of store owner
-//         /////// >>Array of store for each approved store owner
-//          >>On a le max store index, par iteration manuel, on récup sto adres
-//          >>Mapping stores (uint vers store dont address)
-//
-//    approved store owner
-//          mkt / can create stores
-//          sto / can add/remove products
-//          sto / can change product price
-//          sto / can withdraw funds
-//    Shopper
-//          >>list of stores
-//          mkt / browse Storefront and select one
-//          sto / see product page for a given Storefront (including price, quantity)
-//          sto / purchase a product (hence debit customer account, update quantity in the store)
-//
+//UserCrud
 
-    mapping (address => User) public Users;
-    address [] public iterUsers;
-    uint256 nUsers = 0;
+contract Marketplace is
+StoreCrud
+{
+
+  event LogNewStore(address _req, address _store);
+
+  constructor()
+  StoreCrud()
+  {
+    //owner =...
+  }
+
+  function createStore(bytes32 storeName)
+  public
+  //isNotAContract()
+  //isApprovedStoreOwner(msg.sender)
+  returns(address)
+  {
+    address storeAddress = new Store();
+    //Stores CRUD here
+    emit LogNewStore(msg.sender, storeAddress);
+    //insert store in StoreCrud
+    insertStore(storeAddress,storeName);
+    return storeAddress;
+  }
+
+  function getStoreCount()
+    public
+    constant
+    returns(uint count)
+  {
+    return(super.getStoreCount());
+  }
+
+  function getStoreAtIndex(uint index)
+    public
+    constant
+    returns(address storeAddress)
+  {
+    return super.getStoreAtIndex(index);
+  }
+
+  function getStore(address storeAddress)
+    public
+    constant
+    isAStore(storeAddress)
+    returns(bytes32 storeName, uint index)
+  {
+    return(super.getStore(storeAddress));
+  }
+
+
+
+/*
+}
+  mapping (address => User) public Users;
+  address [] public iterUsers;
+  uint256 nUsers = 0;
     uint256 nAdmin = 0; //number of admin for the marketplace
 
     mapping (address => Store) public Stores;
@@ -59,7 +88,7 @@ contract MarketplaceLogic {
 
     enum RoleChoices { Administrator, ApprovedStoreOwner, Shopper}
 
-    /* Modifiers */
+    //Modifiers
     modifier isNotAContract(){
     require (
       msg.sender == tx.origin,
@@ -83,7 +112,7 @@ contract MarketplaceLogic {
     modifier isAdministrator(address req)
     {
       require (
-        /*uint256(Users[req].role) == uint256(RoleChoices.Administrator)*/true,
+        //uint256(Users[req].role) == uint256(RoleChoices.Administrator)true,
       "only administrator is allowed to interact.");
       _;
     }
@@ -123,8 +152,8 @@ contract MarketplaceLogic {
     event LogAdminDeleted(address _req, address _user);
     event LogApprStoreOwnerAdded(address _req, address _user );
     event LogApprStoreOWnerDeleted(address _req, address _user);
-    event LogNewStore(address _req, address _store);
-    event LogStoreDeleted(address _req, address _store);
+    event LogNewStoreLogic(address _req, address _store);
+    event LogStoreLogicDeleted(address _req, address _store);
 
     event myLog (string myString, address myAddress);
 
@@ -248,7 +277,7 @@ contract MarketplaceLogic {
       return(iterStores, storeNames);
     }
 
-    function createStore(bytes32 name)
+    function createStoreLogic(bytes32 name)
     public
     isNotAContract()
     isApprovedStoreOwner(msg.sender)
@@ -262,9 +291,11 @@ contract MarketplaceLogic {
       iterStores.push(storeAddress);
       storeNames.push(name);
       nStores++;
-      emit LogNewStore(msg.sender, storeAddress);
+      emit LogNewStoreLogic(msg.sender, storeAddress);
       return storeAddress;
     }
+
+*/
 
     //TBD RAF delete store
 

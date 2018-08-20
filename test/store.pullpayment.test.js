@@ -1,73 +1,114 @@
+
+const Marketplace = artifacts.require("Marketplace");
+const Store = artifacts.require("Store");
+const BigNumber = web3.BigNumber;
+
 // !!! You need to install chai locally (on your node_modules directory),
 // so that require can find it. To do so, type:
 // type
 //"npm install --save-dev chai" in the local directory
 //"npm install --save-dev chai-bignumber" in the local directory
 
-const Store = artifacts.require("Store");
-const BigNumber = web3.BigNumber;
 
 require('chai')
   .use(require('chai-bignumber')(BigNumber))
   .should();
 
+
 contract('Store Pull Payment js tests', async (accounts) => {
 
-  const owner = accounts[0];
-  const alice = accounts[1];
-  const bob = accounts[2];
-  const alix = accounts[3];
+  const marketplaceOwner = accounts[0];
+  const storeOwner = accounts[1];
+  const alice = accounts[2];
+//  const bob = accounts[3];
+//  const alix = accounts[4];
 
   const amount0 = web3.toWei(0.0, 'ether');
   const amount05 = web3.toWei(0.5, 'ether');
   const amount1 = web3.toWei(1.0, 'ether');
   const amount2 = web3.toWei(2.0, 'ether');
+  const amount3 = web3.toWei(3.0, 'ether');
   const amount5 = web3.toWei(5.0, 'ether');
   const amount10 = web3.toWei(10.0, 'ether');
 
   let tryCatch = require("./exceptions.js").tryCatch;
   let errTypes = require("./exceptions.js").errTypes;
 
-  let initialAmountAlice = await web3.fromWei(web3.eth.getBalance(web3.eth.accounts[1]))
+  //let initialAmountAlice = await web3.fromWei(web3.eth.getBalance(web3.eth.accounts[1]))
 
-  it("balance of store owner in the escrow should be 0.", async () => {
-    let instance = await Store.deployed({from : owner});
-    const paymentsToAccount0 = await instance.payments(owner);
+  let marketplace;
+  let store;
+  beforeEach('setup contract for each test, marketplaceOwner approve 1 store owner, store owner create 1 store.', async function () {
+    //get marketplace instance
+    marketplace = await Marketplace.new({from : marketplaceOwner});
+    //add approved store owner
+    //await marketplace.addAprovedStoreOwner (storeOwner,{from : marketplaceOwner});
+    //create store
+    const result1 = await marketplace.createStore("Cars",{from : storeOwner});
+    //if needed, have a look at the results of teh transactionwe
+    //console.log(result.tx); console.log(result.logs);console.log(result.receipt);
+    //TBD : check also event name
+    const adrStore = result1.logs[0].args._store; //console.log("address of the new store : "+adrStore);
+    store = await Store.at(adrStore);
+
+    //assert.equal(await marketplace.getStoresNum(), 1, "marketplace should have 1 stores");
+    assert.equal(await store.isAvailable(), true, "store should be available, otherwise store was not created. check constructore of StoreLogic");
+
+    //let's add product in the store
+    await store.addProduct(111111,"Yellow Bike",10,"A nice Yellow Bike", amount1,"images/BIKE1.jpeg",{from: storeOwner });
+    assert.equal(await store.getProductCount(), 1, "store should have 1 product");
+  })
+
+/*
+  it("marketplaceOwner approve 1 store owner, store owner create 1 store.", async () => {
+    let instanceMarketplace = await Marketplace.deployed({from : marketplaceOwner});
+    await instanceMarketplace.addAprovedStoreOwner (storeOwner,{from:marketplaceOwner});
+    const result1 = await instanceMarketplace.createStore("Cars",{from : storeOwner});
+    //if needed, have a look at the results of teh transactionwe
+    //console.log(result.tx); console.log(result.logs);console.log(result.receipt);
+    //TBD : check also event name
+    const adrStore = result1.logs[0].args._store; //console.log("address of the new store : "+adrStore);
+    var instanceStore = await Store.at(adrStore);
+    assert.equal(await instanceMarketplace.getStoresNum(), 1, "marketplace should have 1 stores");
+    assert.equal(await instanceStore.dummy(), 42, "should get the magic number from an instanciated store, otherwise store was not created. check constructore of StoreLogic");
+    })
+*/
+
+
+  it("balance of store owner in the escrow of the store should be 0.", async () => {
+    //marketplarketplace = await Store.deployed({from : storeOwner});
+    const paymentsToAccount0 = await store.payments(storeOwner);
     paymentsToAccount0.should.be.bignumber.equal(amount0);
   })
 
-  it("balance of store owner in the escrow should be 1 ether.", async () => {
-    let instance = await Store.deployed({from : owner});
-    let idProduct2 = await instance.addProduct("Yellow Bike", 10, "A nice Yellow Bike", amount1, {from: owner });
-    await instance.purchaseProduct (0, 1, { value: amount2, from: alice });
-    //console.log(`idProduct: ${idProduct}`);
-    const paymentsToAccount0 = await instance.payments(owner);
-    paymentsToAccount0.should.be.bignumber.equal(amount1);
+  it("balance of store owner in the escrow of the store should be 2 ether.", async () => {
+    //let instanceMarketplace = await Store.deployed({from : storeOwner});
+    //let idProduct2 = await store.addProduct("Yellow Bike", 10, "A nice Yellow Bike", amount1, {from: storeOwner });
+    await store.purchaseProduct (111111,2,{ value: amount3, from: alice });
+    //-console.log(`idProduct: ${idProduct}`);
+    const paymentsToAccount0 = await store.payments(storeOwner,{from : storeOwner});
+    paymentsToAccount0.should.be.bignumber.equal(amount2);
   })
 
-  it("store user withdrawPayments must be reverted.", async () => {
-    let instance = await Store.deployed({from: owner});
-    await instance.purchaseProduct (0, 1, { value: amount2, from: alice });
-    //let amountToRecover = await instance.payments(owner, {from: owner });
-    await tryCatch(instance.withdrawPayments({from: alice}), errTypes.revert);
+  it("balance of shopper in the escrow of the store should be O ether.", async () => {
+    //let instanceMarketplace = await Store.deployed({from : storeOwner});
+    //let idProduct2 = await store.addProduct("Yellow Bike", 10, "A nice Yellow Bike", amount1, {from: storeOwner });
+    //await store.purchaseProduct (111111,2,{ value: amount3, from: alice });
+    //-console.log(`idProduct: ${idProduct}`);
+    const paymentsToAccount0 = await store.payments(alice,{from : alice});
+    paymentsToAccount0.should.be.bignumber.equal(amount0);
   })
 
-  it("store owner withdrawPayments must be successful.", async () => {
-    let instance = await Store.deployed({from: owner});
-    await instance.purchaseProduct (0, 1, { value: amount2, from: alice });
-    let amountToRecover = await instance.payments(owner, {from: owner });
-    await instance.withdrawPayments({from: owner});
-
-  })
-
-  it("buyer must receive change.", async () => {
-    let instance = await Store.deployed({from : owner});
+  it("buyer receive change when buying, accounting is fine.", async () => {
     //const initialAmount = web3.fromWei(web3.eth.getBalance(web3.eth.accounts[1]));
-    const initialBalance = await web3.eth.getBalance(accounts[1]);
+    const initialBalanceOfBuyer = await web3.eth.getBalance(alice);
+    const initialBalanceOfEscrow= await store.payments(storeOwner);
+    //console.log("initialBalanceOfBuyer"+initialBalanceOfBuyer);
+    //console.log("initialBalanceOfEscrow"+initialBalanceOfEscrow);
 
     // Obtain gas used from the receipt
-    //const receipt = await instance.buySth1Ether(125,{ value: amount10, from: alice });
-    const receipt = await instance.purchaseProduct (0, 1, { value: amount2, from: alice });
+    //const receipt = await instanceMarketplace.buySth1Ether(125,{ value: amount10, from: alice });
+    const receipt = await store.purchaseProduct (111111,1,{ value: amount3, from: alice });
     const gasUsed = receipt.receipt.gasUsed;
     //console.log(`GasUsed: ${receipt.receipt.gasUsed}`);
 
@@ -77,9 +118,57 @@ contract('Store Pull Payment js tests', async (accounts) => {
     //console.log(`GasPrice: ${tx.gasPrice}`);
 
     //const remainingAmount = web3.fromWei(web3.eth.getBalance(web3.eth.accounts[1]));
-    const finalBalance = await web3.eth.getBalance(accounts[1]);
-    const paymentEscrowed = await instance.payments(owner);
-    assert.equal(finalBalance.add(paymentEscrowed).add(gasPrice.mul(gasUsed)).toString(),
-    initialBalance.toString(), "Must be equal.");
+    const finalBalanceOfBuyer = await web3.eth.getBalance(alice);
+    const finalBalanceOfEscrow = await store.payments(storeOwner);
+
+    //console.log("finalBalanceOfBuyer"+finalBalanceOfBuyer);
+    //console.log("finalBalanceOfEscrow"+finalBalanceOfEscrow);
+
+    assert.equal(finalBalanceOfBuyer.add(finalBalanceOfEscrow).add(gasPrice.mul(gasUsed)).toString(),
+    initialBalanceOfBuyer.toString(),"Law of conservation of money, must be equal.");
   })
+
+  it("store owner can retreive fund from store escrow, accounting is fine.", async () => {
+    //let instanceMarketplace = await Store.deployed({from: owner});
+    //await instanceMarketplace.purchaseProduct (0, 1, { value: amount2, from: alice });
+
+    await store.purchaseProduct (111111,1,{ value: amount3, from: alice });
+
+    const initialBalanceOfStoreOwner = await web3.eth.getBalance(storeOwner);
+    const initialBalanceOfEscrow= await store.payments(storeOwner);
+
+    const receipt = await store.withdrawPayments({from: storeOwner});
+    const gasUsed = receipt.receipt.gasUsed;
+
+    //console.log(`GasUsed: ${receipt.receipt.gasUsed}`);
+    // Obtain gasPrice from the transaction
+    const tx = await web3.eth.getTransaction(receipt.tx);
+    const gasPrice = tx.gasPrice;
+    //console.log(`GasPrice: ${tx.gasPrice}`);
+
+    const finalBalanceOfStoreOwner = await web3.eth.getBalance(storeOwner);
+    const finalBalanceOfEscrow= await store.payments(storeOwner);
+
+    assert.equal(initialBalanceOfStoreOwner.add(initialBalanceOfEscrow).sub(gasPrice.mul(gasUsed)).toString(),
+    finalBalanceOfStoreOwner.toString(),"Law of conservation of money, must be equal.");
+
+    assert.equal(finalBalanceOfEscrow.toString(),0,"Escrow is empty");
+
+    //paymentsToAccount0.should.be.bignumber.equal(amount0);
+  })
+
+
+
+//paymentsToAccount0.should.be.bignumber.equal(amount1);
+
+
+/*
+  it("store user can not withdrawPayments. must be reverted.", async () => {
+    //let instanceMarketplace = await Store.deployed({from: owner});
+    //await store.purchaseProduct (0, 1, { value: amount2, from: alice });
+    //let bounty = await store.payments(owner, {from: owner });
+    await tryCatch(store.withdrawPayments({from: alice}), errTypes.revert);
+  })
+*/
+
 })
