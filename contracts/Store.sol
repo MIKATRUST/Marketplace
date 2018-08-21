@@ -2,16 +2,18 @@ pragma solidity ^0.4.24;
 
 //import "./Marketplace.sol";
 //import "./LCrud.sol";
+import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import "./../contracts/ItemCrud.sol";
 import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 import 'openzeppelin-solidity/contracts/payment/PullPayment.sol';
 
 contract Store is
+Ownable,
 ItemCrud,
 PullPayment
  {
     using SafeMath for uint256;
-    address public owner; // store owner
+    //address public owner; // store owner we use owne of ownable
 
     //Events
     //To be done
@@ -26,10 +28,14 @@ PullPayment
 
     constructor()
     public
+    Ownable()
     ItemCrud()
     PullPayment()
     {
-      owner = tx.origin; // à refacto avec ownable
+      //super.transferOwnership(tx.origin);
+      //not the marketplace but the caller to marketplace.createStore()
+      //owner = tx.origin; // à refacto avec ownable
+      super.transferOwnership(tx.origin);
     }
 
     function isAvailable()
@@ -66,6 +72,14 @@ PullPayment
     public
     {
       super.withdrawPayments();
+    }
+
+    /**
+    * @dev Returns the credit owed to an address.
+    * @param _dest The creditor's address.
+    */
+    function payments(address _dest) public view returns (uint256) {
+      return super.payments(_dest);
     }
 
     function addProduct(uint productSku,bytes32 productName,uint productQuantity,bytes32 productDescription,uint productPrice,bytes32 productImage)
@@ -123,6 +137,17 @@ PullPayment
     {
       return(super.updateItemQuantity(productSku, productQuantity));
     }
+
+    // Fallback function - Called if other functions don't match call or
+    // sent ether without data
+    // Typically, called when invalid data is sent
+    // Added so ether sent to this contract is reverted if the contract fails
+    // otherwise, the sender's money is transferred to contract
+    function () public {
+      revert();
+    }
+
+
 
 
 }

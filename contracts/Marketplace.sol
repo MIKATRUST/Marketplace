@@ -1,28 +1,59 @@
 pragma solidity ^0.4.24;
 
+import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import 'openzeppelin-solidity/contracts/lifecycle/Pausable.sol';
+import 'openzeppelin-solidity/contracts/lifecycle/Destructible.sol';
 import "./../contracts/StoreCrud.sol";
 import "./Store.sol";
-//import 'openzeppelin-solidity/contracts/ownership/rbac/RBAC.sol';
+import 'openzeppelin-solidity/contracts/access/rbac/RBAC.sol';
+import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import 'openzeppelin-solidity/contracts/lifecycle/Pausable.sol';
+import 'openzeppelin-solidity/contracts/lifecycle/Destructible.sol';
 //import 'openzeppelin-solidity/contracts/payment/PullPayment.sol';
 
 //UserCrud
-
 contract Marketplace is
+Ownable,
+Pausable,
+Destructible,
+RBAC,
 StoreCrud
 {
+  string constant MKT_ROLE_SHOPPER = 'shopper';
+  string constant MKT_ROLE_ADMIN = 'marketplaceAdministrator';
+  string constant MKT_ROLE_APPROVED_STORE_OWNER = 'marketplaceApprovedStoreOwner';
 
-  event LogNewStore(address _req, address _store);
+  uint256 nAdmin = 0; //number of operator having the role MKT_ROLE_ADMIN
 
+  event LogNewStore(address _req, address _store); // Thie event is catched by the store
+  event LogAddedRoleAdministrator(address _requester, address _operator);
+  event LogDeletedRoleAdministrator(address _requester, address _operator);
+  event LogAddedRoleApprovedStoreOwner(address _requester, address _operator);
+  event LogDeletedRoleApprovedStoreOWner(address _requester, address _operator);
+
+/*
+  modifier atLeast2Admin()
+  {
+    require (nAdmin > 2,
+      "can not remove last Administrator.");
+    _;
+  }
+*/
   constructor()
+  public
+
+  Ownable()
   StoreCrud()
   {
     //owner =...
+    super.addRole(msg.sender, MKT_ROLE_ADMIN);
   }
 
   function createStore(bytes32 storeName)
   public
   //isNotAContract()
   //isApprovedStoreOwner(msg.sender)
+  onlyRole(MKT_ROLE_APPROVED_STORE_OWNER)
   returns(address)
   {
     address storeAddress = new Store();
@@ -32,6 +63,60 @@ StoreCrud
     insertStore(storeAddress,storeName);
     return storeAddress;
   }
+
+  function addRoleAdministrator (address operator)
+  public
+  onlyRole(MKT_ROLE_ADMIN)
+  {
+    super.addRole(operator, MKT_ROLE_ADMIN);
+    nAdmin++;
+    emit LogAddedRoleAdministrator(msg.sender, operator);
+  }
+
+  function removeRoleAdministrator (address operator)
+  public
+  onlyRole(MKT_ROLE_ADMIN)
+  //notForMyself(user)
+  //atLeast1Admin ()
+  {
+    super.removeRole(operator, MKT_ROLE_ADMIN);
+    nAdmin--;
+    emit LogDeletedRoleAdministrator(msg.sender, operator);
+  }
+
+  function addRoleApprovedStoreOwner (address operator)
+  public
+  onlyRole(MKT_ROLE_ADMIN)
+  {
+    super.addRole(operator, MKT_ROLE_APPROVED_STORE_OWNER);
+    emit LogAddedRoleApprovedStoreOwner(msg.sender, operator);
+  }
+
+  function removeRoleApprovedStoredOwner (address operator)
+  public
+  onlyRole(MKT_ROLE_ADMIN)
+  {
+    super.removeRole(operator, MKT_ROLE_APPROVED_STORE_OWNER);
+    emit LogDeletedRoleApprovedStoreOWner(msg.sender, operator);
+  }
+
+  function hasRole(address operator, string role)
+  public
+  view
+  returns(bool)
+  {
+    return(super.hasRole(operator, role));
+  }
+
+/* ??????
+  function deleteUser (address user)
+  internal
+  {
+    delete iterUsers[Users[user].idxIterUsers];
+    delete Users[user];
+    //nUsers--; No because it is used with index
+  }
+*/
 
   function getStoreCount()
     public
@@ -57,7 +142,6 @@ StoreCrud
   {
     return(super.getStore(storeAddress));
   }
-
 
 
 /*

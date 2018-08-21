@@ -9,13 +9,16 @@ const BigNumber = web3.BigNumber;
 //"npm install --save-dev chai" in the local directory
 //"npm install --save-dev chai-bignumber" in the local directory
 
-
 require('chai')
   .use(require('chai-bignumber')(BigNumber))
   .should();
 
 
 contract('Store Pull Payment js tests', async (accounts) => {
+
+  const MKT_ROLE_SHOPPER = 'shopper';
+  const MKT_ROLE_ADMIN = 'marketplaceAdministrator';
+  const MKT_ROLE_APPROVED_STORE_OWNER = 'marketplaceApprovedStoreOwner';
 
   const marketplaceOwner = accounts[0];
   const storeOwner = accounts[1];
@@ -38,22 +41,26 @@ contract('Store Pull Payment js tests', async (accounts) => {
 
   let marketplace;
   let store;
-  beforeEach('setup contract for each test, marketplaceOwner approve 1 store owner, store owner create 1 store.', async function () {
+  beforeEach('setup contract for each test, marketplaceOwner approve 1 store owner, store owner create 1 store and 1 product.', async function () {
     //get marketplace instance
     marketplace = await Marketplace.new({from : marketplaceOwner});
-    //add approved store owner
-    //await marketplace.addAprovedStoreOwner (storeOwner,{from : marketplaceOwner});
-    //create store
-    const result1 = await marketplace.createStore("Cars",{from : storeOwner});
-    //if needed, have a look at the results of teh transactionwe
-    //console.log(result.tx); console.log(result.logs);console.log(result.receipt);
-    //TBD : check also event name
-    const adrStore = result1.logs[0].args._store; //console.log("address of the new store : "+adrStore);
-    store = await Store.at(adrStore);
-
-    //assert.equal(await marketplace.getStoresNum(), 1, "marketplace should have 1 stores");
-    assert.equal(await store.isAvailable(), true, "store should be available, otherwise store was not created. check constructore of StoreLogic");
-
+    //addRoleApprovedStoreOwner to storeOwner, verify
+    await marketplace.addRoleApprovedStoreOwner(storeOwner,{from:marketplaceOwner});
+    assert.equal(await marketplace.hasRole(storeOwner,MKT_ROLE_APPROVED_STORE_OWNER),true,"approvedStoreOwner should not have the role ApprovedStoreOwner.")
+    //event should be emitted when a store is addressCreatedStore
+    var eventEmitted = false
+    var event = marketplace.LogNewStore()
+    await event.watch((err, res) => {
+        addressCreatedStore = res.args._store.toString(16)
+        eventEmitted = true
+    })
+    //Create store, verify that LogNewStore was emitted
+    let storeName = "default store name";
+    let transactionReceipt = await marketplace.createStore(storeName,{from : storeOwner});
+    assert.equal(eventEmitted, true, 'creating a store should emit a LogNewStore event')
+    //Verify that store is avaiable
+    store = await Store.at(addressCreatedStore);
+    assert.equal(await store.isAvailable(),true,"store should be available");
     //let's add product in the store
     await store.addProduct(111111,"Yellow Bike",10,"A nice Yellow Bike", amount1,"images/BIKE1.jpeg",{from: storeOwner });
     assert.equal(await store.getProductCount(), 1, "store should have 1 product");
@@ -153,13 +160,14 @@ contract('Store Pull Payment js tests', async (accounts) => {
     finalBalanceOfStoreOwner.toString(),"Law of conservation of money, must be equal.");
 
     assert.equal(finalBalanceOfEscrow.toString(),0,"Escrow is empty");
-
-    //paymentsToAccount0.should.be.bignumber.equal(amount0);
   })
 
-
-
-//paymentsToAccount0.should.be.bignumber.equal(amount1);
+  it("user with role marketplaceAdministrator or no role can not recover funds from escrow.", async () => {
+    assert.equal(await marketplace.hasRole(marketplaceOwner,MKT_ROLE_ADMIN),true,
+    "marketplaceOwner should not have the role marketplaceAdmin");
+    await tryCatch(store.withdrawPayments({from: marketplaceOwner}), errTypes.revert);
+    await tryCatch(store.withdrawPayments({from: alice}), errTypes.revert);
+  })
 
 
 /*

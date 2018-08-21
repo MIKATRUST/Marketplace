@@ -25,6 +25,9 @@ matters.
 `destructible` - Provides a method for the creator of a contract to destroy it.
 [zeppelin/lifecycle/Destructible.sol](zeppelin/lifecycle/Destructible.sol)
 
+To check is the contract was effectively destroyed : https://stackoverflow.com/questions/37644395/how-to-find-out-if-an-ethereum-address-is-a-contract
+
+
 ### Maintenance
 
 `update` - Provides a method for the creator of a contract to update it to a

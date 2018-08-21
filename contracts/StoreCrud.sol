@@ -14,7 +14,7 @@ contract StoreCrud {
   mapping(address => StoreStruct) private storeStructs;
   address[] private storeIndex;
 
-  event LogNewStore   (address indexed storeAddress, uint index, bytes32 storeName);
+  event LogInsertStore(address /*indexed*/ storeAddress, uint index, bytes32 storeName);
   event LogUpdateStore(address indexed storeAddress, uint index, bytes32 storeName);
   event LogDeleteStore(address indexed storeAddress, uint index);
 
@@ -52,7 +52,7 @@ contract StoreCrud {
   {
     storeStructs[storeAddress].storeName = storeName;
     storeStructs[storeAddress].index     = storeIndex.push(storeAddress)-1;
-    emit LogNewStore(
+    emit LogInsertStore(
         storeAddress,
         storeStructs[storeAddress].index,
         storeName);
