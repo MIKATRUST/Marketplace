@@ -26,15 +26,29 @@ contract('MarketPlace Destructible js tests', async (accounts) => {
   let tryCatch = require("./exceptions.js").tryCatch;
   let errTypes = require("./exceptions.js").errTypes;
 
-  it("no role user, like alice must not be able to destroy the marketplace.", async () => {
+  it("no role user should not be able to destroy the marketplace.", async () => {
     let marketplace = await Marketplace.deployed();
     await tryCatch(marketplace.destroy({from: alice}), errTypes.revert);
   })
 
-  it("marketplaceAdministrator should be able to destroy the store", async () => {
+  //V2 implement revenue sharing betweenn the stores and the marketplace
+  it("testing fallback function, tentative to send ether to non existing function of the marketplace should be reverted",async () => {
     let marketplace = await Marketplace.deployed();
-    let storeCountNumber = await marketplace.getStoreCount();
-    await marketplace.destroy({from: owner});
+    await tryCatch(marketplace.aNiceFunctionThatDoesNotExit({from: alice, value: amount1}), errTypes.revert);
+  })
+
+  it("marketplaceAdministrator should be able to destroy the marketplace", async () => {
+    let marketplace = await Marketplace.deployed();
+    //web3.getCode("0xbfb2e296d9cf3e593e79981235aed29ab9984c0f");
+    //let storeCountNumber = await marketplace.getStoreCount();
+    //assert(marketplace !== undefined, "marketplace instance should be defined")
+    await marketplace.destroy({from: marketplaceOwner});
+    assert.equal(await marketplace.owner(),0,"after seldestruct(), all values of the contract should be set to zero");
+
+    //assert(marketplace == undefined, "marketplace instance is not defined anymore")
+    //assert(markeplace == undefined, "following destruction, store instance should not be defined anymore")
+    //eth.getCode("0xbfb2e296d9cf3e593e79981235aed29ab9984c0f")
+
     // work correctly but exception is not catched
     //await tryCatch(instance.heartBeat({from: owner}), errTypes.revert);
     //assert.isUndefined(instance);

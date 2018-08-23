@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Marketplace Administrator Page</title>
+</head>
+<body>
+
+<h1>Marketplace Administrator Page</h1>
+<h2>About you</h2>
+<form>
+  Your address is
+  <br>
+  <input type="text" name="firstname" size="100" readonly>
+  <br>
+  <br>
+  Your role is
+  <br>
+  <input type="text" name="lastname" size="100" readonly>
+  <br>
+</form>
+
+<h2>Addresses of Approved Store Owners :</h2>
+<input type="text" name="lastname" size="100" readonly>
+<input onclick="delApprovedStoreOwner()" type="button" value="Delete Approved Store Owner" enabled>
+<input onclick="delApprovedStoreOwner()" type="button" value="Delete Approved Store Owner" disabled>
+
+
+<h2>Add a new Approved Store Owner</h2>
+<input type="text" name="lastname" size="100">
+<input onclick="addApprovedStoreOwner()" type="button" value="Add Approved Store Owner" enabled>
+
+<h2>Actions on page</h2>
+<p id="action"></p>
+
+<script>
+function delApprovedStoreOwner() {
+    document.getElementById("action").innerHTML = "delApprovedStoreOwner";
+}
+function addApprovedStoreOwner() {
+    document.getElementById("action").innerHTML = "addApprovedStoreOwner";
+}
+</script>
+
+
+
+</body>
+</html>

@@ -35,7 +35,7 @@ contract CrudItem {
   }
 
   function isCrudItem(uint itemSku)
-    public
+    internal
     constant
     returns(bool isIndeed)
   {
@@ -50,7 +50,7 @@ contract CrudItem {
     bytes32 itemDescription,
     uint itemPrice,
     bytes32 itemImage)
-    public
+    internal
     isNotACrudItem(itemSku)
     returns(uint index)
   {
@@ -73,7 +73,7 @@ contract CrudItem {
   }
 
   function deleteCrudItem(uint itemSku)
-    public
+    internal
     isACrudItem(itemSku)
     returns(uint index)
   {
@@ -98,7 +98,7 @@ contract CrudItem {
   }
 
   function getCrudItem(uint itemSku)
-    public
+    internal
     isACrudItem(itemSku)
     constant
     returns(bytes32 itemName, uint itemQuantity, bytes32 itemDescription, uint itemPrice, bytes32 itemImage, uint index)
@@ -113,7 +113,7 @@ contract CrudItem {
   }
 
   function getCrudItemQuantityPrice(uint itemSku)
-    public
+    internal
     isACrudItem(itemSku)
     constant
     returns(uint itemQuantity, uint itemPrice)
@@ -124,7 +124,7 @@ contract CrudItem {
   }
 
   function updateCrudItemPrice(uint itemSku, uint itemPrice)
-    public
+    internal
     isACrudItem(itemSku)
     returns(bool success)
   {
@@ -141,7 +141,7 @@ contract CrudItem {
   }
 
   function updateCrudItemQuantity(uint itemSku, uint itemQuantity)
-    public
+    internal
     isACrudItem(itemSku)
     returns(bool success)
   {
@@ -158,7 +158,7 @@ contract CrudItem {
   }
 
   function getCrudItemCount()
-    public
+    internal
     constant
     returns(uint count)
   {
@@ -166,7 +166,7 @@ contract CrudItem {
   }
 
   function getCrudItemAtIndex(uint index)
-    public
+    internal
     constant
     returns(uint itemSku)
   {

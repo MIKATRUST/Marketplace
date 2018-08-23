@@ -4,7 +4,6 @@ pragma solidity ^0.4.24;
 //import "./LCrud.sol";
 import '../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import '../node_modules/openzeppelin-solidity/contracts/lifecycle/Pausable.sol';
-import '../node_modules/openzeppelin-solidity/contracts/lifecycle/Destructible.sol';
 import "./../contracts/CrudItem.sol";
 import '../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol';
 import '../node_modules/openzeppelin-solidity/contracts/payment/PullPayment.sol';
@@ -12,7 +11,6 @@ import '../node_modules/openzeppelin-solidity/contracts/payment/PullPayment.sol'
 contract Store is
 Ownable,
 Pausable,
-Destructible,
 CrudItem,
 PullPayment
  {
@@ -21,14 +19,16 @@ PullPayment
 
     //Event
     // Events - publicize actions to external listeners
-    event LogStoreCreate(address operator);
-    event LogStoreDelete(address operator); // not used yet
-    event LogStoreAddProduct(uint sku);
-    event LogStoreRemoveProduct(uint sku);
-    event LogStoreUpdatePrice(uint _sku, uint256 _updatedUnitPrice);
+    event LogStoreCreate(address _operator);
+    event LogStoreDelete(address _operator); // not used yet
+    event LogStoreAddProduct(uint _sku, bytes32 _name, uint _quantity,bytes32 _description,uint _unitPrice);
+    event LogStoreRemoveProduct(uint _sku);
+    event LogStoreUpdatePrice(uint _sku, uint256 _unitPrice);
     event LogStoreUpdateQuantity(uint _sku, uint256 _updatedQuantity);
     event LogUpdateDescription(uint _sku, bytes32 updatedDescription);
-    event LogPurchaseProduct(uint sku, uint quantity, uint256 totalPrice, address customerAddress);
+    event LogPurchaseProduct(uint _sku, uint _quantity, uint256 _totalPrice, address _customer);
+    event LogDestroyStoreAndSend(address _operator);
+    event LogWithdrawPayment(address _operator, uint256 _fund);
 
     //Modifiers
     //refund them after pay for item (why it is before, _ checks for logic before func)
@@ -84,9 +84,10 @@ PullPayment
     }
 
     function withdrawPayments ()
-    onlyOwner //Only store owner
+    onlyOwner
     public
     {
+      emit LogWithdrawPayment(msg.sender, super.payments(msg.sender));
       super.withdrawPayments();
     }
 
@@ -105,7 +106,8 @@ PullPayment
     returns(uint)
     {
       uint index= super.insertCrudItem(productSku,productName,productQuantity,productDescription,productPrice,productImage);
-      //emit LogAddProduct(store_name, id, _name);
+      emit LogStoreAddProduct(productSku,productName,productQuantity,
+        productDescription,productPrice);
       return(index);
     }
 
@@ -174,16 +176,18 @@ PullPayment
       return(super.updateCrudItemQuantity(productSku, updatedQuantity));
     }
 
-    // Fallback function - Called if other functions don't match call or
-    // sent ether without data
-    // Typically, called when invalid data is sent
-    // Added so ether sent to this contract is reverted if the contract fails
-    // otherwise, the sender's money is transferred to contract
-    function () public {
-      revert();
+    function destroyAndSend()
+    public
+    onlyOwner
+    {
+      emit LogDestroyStoreAndSend(msg.sender);
+      super.withdrawPayments();
+      selfdestruct(owner);
     }
 
-
-
+    // Fallback function, sent ether to a non referenced function of this contract should be reverted
+    function () public {
+        revert();
+    }
 
 }

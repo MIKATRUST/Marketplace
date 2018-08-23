@@ -4,6 +4,8 @@ What does your project do?
 
 see Zeppelin exemple : https://github.com/OpenZeppelin/openzeppelin-solidity
 
+see react auth exemple : https://github.com/truffle-box/react-auth-box
+
 
 Installation Ubuntu 16.04 sur virtual box
 https://medium.com/@tushar0618/install-ubuntu-16-04-lts-on-virtual-box-desktop-version-30dc6f1958d0

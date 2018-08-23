@@ -26,7 +26,7 @@ matters.
 [zeppelin/lifecycle/Destructible.sol](zeppelin/lifecycle/Destructible.sol)
 
 To check is the contract was effectively destroyed : https://stackoverflow.com/questions/37644395/how-to-find-out-if-an-ethereum-address-is-a-contract
-
+eth.getCode("0xbfb2e296d9cf3e593e79981235aed29ab9984c0f")
 
 ### Maintenance
 
