@@ -1,14 +1,14 @@
 pragma solidity ^0.4.24;
 
-import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
-import 'openzeppelin-solidity/contracts/lifecycle/Pausable.sol';
-import 'openzeppelin-solidity/contracts/lifecycle/Destructible.sol';
+import '../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import '../node_modules/openzeppelin-solidity/contracts/lifecycle/Pausable.sol';
+import '../node_modules/openzeppelin-solidity/contracts/lifecycle/Destructible.sol';
 import "./../contracts/StoreCrud.sol";
 import "./Store.sol";
-import 'openzeppelin-solidity/contracts/access/rbac/RBAC.sol';
-import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
-import 'openzeppelin-solidity/contracts/lifecycle/Pausable.sol';
-import 'openzeppelin-solidity/contracts/lifecycle/Destructible.sol';
+import '../node_modules/openzeppelin-solidity/contracts/access/rbac/RBAC.sol';
+import '../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import '../node_modules/openzeppelin-solidity/contracts/lifecycle/Pausable.sol';
+import '../node_modules/openzeppelin-solidity/contracts/lifecycle/Destructible.sol';
 //import 'openzeppelin-solidity/contracts/payment/PullPayment.sol';
 
 //UserCrud

@@ -2,12 +2,12 @@ pragma solidity ^0.4.24;
 
 //import "./Marketplace.sol";
 //import "./LCrud.sol";
-import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
-import 'openzeppelin-solidity/contracts/lifecycle/Pausable.sol';
-import 'openzeppelin-solidity/contracts/lifecycle/Destructible.sol';
+import '../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import '../node_modules/openzeppelin-solidity/contracts/lifecycle/Pausable.sol';
+import '../node_modules/openzeppelin-solidity/contracts/lifecycle/Destructible.sol';
 import "./../contracts/ItemCrud.sol";
-import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
-import 'openzeppelin-solidity/contracts/payment/PullPayment.sol';
+import '../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol';
+import '../node_modules/openzeppelin-solidity/contracts/payment/PullPayment.sol';
 
 contract Store is
 Ownable,
