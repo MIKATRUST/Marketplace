@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 import '../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import '../node_modules/openzeppelin-solidity/contracts/lifecycle/Pausable.sol';
 import '../node_modules/openzeppelin-solidity/contracts/lifecycle/Destructible.sol';
-import "./../contracts/StoreCrud.sol";
+import "./../contracts/CrudStore.sol";
 import "./Store.sol";
 import '../node_modules/openzeppelin-solidity/contracts/access/rbac/RBAC.sol';
 import '../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol';
@@ -17,7 +17,7 @@ Ownable,
 Pausable,
 Destructible,
 RBAC,
-StoreCrud
+CrudStore
 {
   string constant MKT_ROLE_SHOPPER = 'shopper';
   string constant MKT_ROLE_ADMIN = 'marketplaceAdministrator';
@@ -43,7 +43,7 @@ StoreCrud
   public
 
   Ownable()
-  StoreCrud()
+  CrudStore()
   {
     //owner =...
     super.addRole(msg.sender, MKT_ROLE_ADMIN);
@@ -57,9 +57,9 @@ StoreCrud
   {
     address storeAddress = new Store();
     //Stores CRUD here
-    emit LogNewStore(msg.sender, storeAddress);
+    emit LogNewStore(msg.sender,storeAddress);
     //insert store in StoreCrud
-    insertStore(storeAddress,storeName);
+    insertCrudStore(storeAddress,storeName);
     return storeAddress;
   }
 
@@ -128,7 +128,7 @@ StoreCrud
     whenNotPaused
     returns(uint count)
   {
-    return(super.getStoreCount());
+    return(super.getCrudStoreCount());
   }
 
   function getStoreAtIndex(uint index)
@@ -137,17 +137,17 @@ StoreCrud
     whenNotPaused
     returns(address storeAddress)
   {
-    return super.getStoreAtIndex(index);
+    return super.getCrudStoreAtIndex(index);
   }
 
   function getStore(address storeAddress)
     public
     constant
     whenNotPaused
-    isAStore(storeAddress)
+    isACrudStore(storeAddress)
     returns(bytes32 storeName, uint index)
   {
-    return(super.getStore(storeAddress));
+    return(super.getCrudStore(storeAddress));
   }
 
 

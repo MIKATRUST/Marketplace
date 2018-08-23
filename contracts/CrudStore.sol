@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 /* Special thanks to Rob Hitchens https://medium.com/@robhitchens/solidity-crud-part-1-824ffa69509a
 */
 
-contract StoreCrud {
+contract CrudStore {
 
   struct StoreStruct {
     bytes32 storeName;
@@ -14,28 +14,29 @@ contract StoreCrud {
   mapping(address => StoreStruct) private storeStructs;
   address[] private storeIndex;
 
-  event LogInsertStore(address /*indexed*/ storeAddress, uint index, bytes32 storeName);
-  event LogUpdateStore(address indexed storeAddress, uint index, bytes32 storeName);
-  event LogDeleteStore(address indexed storeAddress, uint index);
+  event LogInsertCrudStore(address /*indexed*/ storeAddress, uint index, bytes32 storeName);
+  event LogUpdateCrudStore(address indexed storeAddress, uint index, bytes32 storeName);
+  event LogDeleteCrudStore(address indexed storeAddress, uint index);
 
-  modifier isAStore (address _storeAddress)
+  modifier isACrudStore (address _storeAddress)
   {
-      require (isStore(_storeAddress) == true,
+      require (isCrudStore(_storeAddress) == true,
         "this is not a store."
       );
       _;
   }
 
-  modifier isNotAStore (address _storeAddress)
+  modifier isNotACrudStore (address _storeAddress)
   {
-      require (isStore(_storeAddress) == false,
+      require (isCrudStore(_storeAddress) == false,
         "this is a store."
       );
       _;
   }
 
-  function isStore(address storeAddress)
-    public
+  function isCrudStore(address storeAddress)
+    //public
+    internal
     constant
     returns(bool isIndeed)
   {
@@ -43,25 +44,25 @@ contract StoreCrud {
     return (storeIndex[storeStructs[storeAddress].index] == storeAddress);
   }
 
-  function insertStore(
+  function insertCrudStore(
     address storeAddress,
     bytes32 storeName)
-    public
-    isNotAStore(storeAddress)
+    internal
+    isNotACrudStore(storeAddress)
     returns(uint index)
   {
     storeStructs[storeAddress].storeName = storeName;
     storeStructs[storeAddress].index     = storeIndex.push(storeAddress)-1;
-    emit LogInsertStore(
+    emit LogInsertCrudStore(
         storeAddress,
         storeStructs[storeAddress].index,
         storeName);
     return storeIndex.length-1;
   }
 
-  function deleteStore(address storeAddress)
-    public
-    isAStore(storeAddress)
+  function deleteCrudStore(address storeAddress)
+    internal
+    isACrudStore(storeAddress)
     returns(uint index)
   {
     uint rowToDelete = storeStructs[storeAddress].index;
@@ -69,20 +70,21 @@ contract StoreCrud {
     storeIndex[rowToDelete] = keyToMove;
     storeStructs[keyToMove].index = rowToDelete;
     storeIndex.length--;
-    emit LogDeleteStore(
+    emit LogDeleteCrudStore(
         storeAddress,
         rowToDelete);
-    emit LogUpdateStore(
+    emit LogUpdateCrudStore(
         keyToMove,
         rowToDelete,
         storeStructs[keyToMove].storeName);
     return rowToDelete;
   }
 
-  function getStore(address storeAddress)
-    public
+  function getCrudStore(address storeAddress)
+    internal
+    /*public*/
     constant
-    isAStore(storeAddress)
+    isACrudStore(storeAddress)
     returns(bytes32 storeName, uint index)
   {
     return(
@@ -90,16 +92,18 @@ contract StoreCrud {
       storeStructs[storeAddress].index);
   }
 
-  function getStoreCount()
-    public
+  function getCrudStoreCount()
+    internal
+    /*public*/
     constant
     returns(uint count)
   {
     return storeIndex.length;
   }
 
-  function getStoreAtIndex(uint index)
-    public
+  function getCrudStoreAtIndex(uint index)
+    internal
+    /*public*/
     constant
     returns(address storeAddress)
   {

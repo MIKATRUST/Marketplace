@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-contract ItemCrud {
+contract CrudItem {
 
   struct ItemStruct {
     bytes32 itemName;
@@ -14,27 +14,27 @@ contract ItemCrud {
   mapping(uint => ItemStruct) private itemStructs;
   uint[] private itemIndex;
 
-  event LogNewItem   (uint indexed itemSku, uint index, bytes32 itemName, uint itemQuantity, bytes32 itemDescription, uint itemPrice, bytes32 itemImage);
-  event LogUpdateItem(uint indexed itemSku, uint index, bytes32 itemName, uint itemQuantity, bytes32 itemDescription, uint itemPrice, bytes32 itemImage);
-  event LogDeleteItem(uint indexed itemSku, uint index);
+  event LogCrudNewItem   (uint indexed itemSku, uint index, bytes32 itemName, uint itemQuantity, bytes32 itemDescription, uint itemPrice, bytes32 itemImage);
+  event LogCrudUpdateItem(uint indexed itemSku, uint index, bytes32 itemName, uint itemQuantity, bytes32 itemDescription, uint itemPrice, bytes32 itemImage);
+  event LogCrudDeleteItem(uint indexed itemSku, uint index);
 
-  modifier isAnItem (uint _itemSku)
+  modifier isACrudItem (uint _itemSku)
   {
-      require (isItem(_itemSku) == true,
+      require (isCrudItem(_itemSku) == true,
         "this is not an item."
       );
       _;
   }
 
-  modifier isNotAnItem (uint _itemSku)
+  modifier isNotACrudItem (uint _itemSku)
   {
-      require (isItem(_itemSku) == false,
+      require (isCrudItem(_itemSku) == false,
         "this is an item."
       );
       _;
   }
 
-  function isItem(uint itemSku)
+  function isCrudItem(uint itemSku)
     public
     constant
     returns(bool isIndeed)
@@ -43,7 +43,7 @@ contract ItemCrud {
     return (itemIndex[itemStructs[itemSku].index] == itemSku);
   }
 
-  function insertItem(
+  function insertCrudItem(
     uint itemSku,
     bytes32 itemName,
     uint itemQuantity,
@@ -51,7 +51,7 @@ contract ItemCrud {
     uint itemPrice,
     bytes32 itemImage)
     public
-    isNotAnItem(itemSku)
+    isNotACrudItem(itemSku)
     returns(uint index)
   {
     //if(isItem(itemSku)) throw;
@@ -61,7 +61,7 @@ contract ItemCrud {
     itemStructs[itemSku].itemPrice = itemPrice;
     itemStructs[itemSku].itemImage = itemImage;
     itemStructs[itemSku].index = itemIndex.push(itemSku)-1;
-    emit LogNewItem(
+    emit LogCrudNewItem(
       itemSku,
       itemStructs[itemSku].index,
       itemName,
@@ -72,9 +72,9 @@ contract ItemCrud {
     return itemIndex.length-1;
   }
 
-  function deleteItem(uint itemSku)
+  function deleteCrudItem(uint itemSku)
     public
-    isAnItem(itemSku)
+    isACrudItem(itemSku)
     returns(uint index)
   {
     //if(!isItem(itemSku)) throw;
@@ -83,10 +83,10 @@ contract ItemCrud {
     itemIndex[rowToDelete] = keyToMove;
     itemStructs[keyToMove].index = rowToDelete;
     itemIndex.length--;
-    emit LogDeleteItem(
+    emit LogCrudDeleteItem(
         itemSku,
         rowToDelete);
-    emit LogUpdateItem(
+    emit LogCrudUpdateItem(
       keyToMove,
       rowToDelete,
       itemStructs[keyToMove].itemName,
@@ -97,9 +97,9 @@ contract ItemCrud {
     return rowToDelete;
   }
 
-  function getItem(uint itemSku)
+  function getCrudItem(uint itemSku)
     public
-    isAnItem(itemSku)
+    isACrudItem(itemSku)
     constant
     returns(bytes32 itemName, uint itemQuantity, bytes32 itemDescription, uint itemPrice, bytes32 itemImage, uint index)
   {
@@ -112,9 +112,9 @@ contract ItemCrud {
       itemStructs[itemSku].index);
   }
 
-  function getItemQuantityPrice(uint itemSku)
+  function getCrudItemQuantityPrice(uint itemSku)
     public
-    isAnItem(itemSku)
+    isACrudItem(itemSku)
     constant
     returns(uint itemQuantity, uint itemPrice)
   {
@@ -123,13 +123,13 @@ contract ItemCrud {
       itemStructs[itemSku].itemPrice);
   }
 
-  function updateItemPrice(uint itemSku, uint itemPrice)
+  function updateCrudItemPrice(uint itemSku, uint itemPrice)
     public
-    isAnItem(itemSku)
+    isACrudItem(itemSku)
     returns(bool success)
   {
     itemStructs[itemSku].itemPrice = itemPrice;
-    emit LogUpdateItem(
+    emit LogCrudUpdateItem(
       itemSku,
       itemStructs[itemSku].index,
       itemStructs[itemSku].itemName,
@@ -140,13 +140,13 @@ contract ItemCrud {
     return true;
   }
 
-  function updateItemQuantity(uint itemSku, uint itemQuantity)
+  function updateCrudItemQuantity(uint itemSku, uint itemQuantity)
     public
-    isAnItem(itemSku)
+    isACrudItem(itemSku)
     returns(bool success)
   {
     itemStructs[itemSku].itemQuantity = itemQuantity;
-    emit LogUpdateItem(
+    emit LogCrudUpdateItem(
       itemSku,
       itemStructs[itemSku].index,
       itemStructs[itemSku].itemName,
@@ -157,7 +157,7 @@ contract ItemCrud {
     return true;
   }
 
-  function getItemCount()
+  function getCrudItemCount()
     public
     constant
     returns(uint count)
@@ -165,7 +165,7 @@ contract ItemCrud {
     return itemIndex.length;
   }
 
-  function getItemAtIndex(uint index)
+  function getCrudItemAtIndex(uint index)
     public
     constant
     returns(uint itemSku)

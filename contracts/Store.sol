@@ -5,7 +5,7 @@ pragma solidity ^0.4.24;
 import '../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import '../node_modules/openzeppelin-solidity/contracts/lifecycle/Pausable.sol';
 import '../node_modules/openzeppelin-solidity/contracts/lifecycle/Destructible.sol';
-import "./../contracts/ItemCrud.sol";
+import "./../contracts/CrudItem.sol";
 import '../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol';
 import '../node_modules/openzeppelin-solidity/contracts/payment/PullPayment.sol';
 
@@ -13,7 +13,7 @@ contract Store is
 Ownable,
 Pausable,
 Destructible,
-ItemCrud,
+CrudItem,
 PullPayment
  {
     using SafeMath for uint256;
@@ -55,7 +55,7 @@ PullPayment
     constructor()
     public
     Ownable()
-    ItemCrud()
+    CrudItem()
     PullPayment()
     {
       super.transferOwnership(tx.origin);
@@ -77,7 +77,7 @@ PullPayment
     giveBackChange(productSku, productPurchaseQty)
     {
       (uint productQty,uint productPrice) = getProductQuantityPrice(productSku);
-      super.updateItemQuantity(productSku, productQty.sub(productPurchaseQty));
+      super.updateCrudItemQuantity(productSku, productQty.sub(productPurchaseQty));
       //updateProductQuantity(productSku, productQty.sub(productPurchaseQty));
       super.asyncTransfer(owner,(productPurchaseQty).mul(productPrice));
       //emit LogPurchaseProduct(productSku, productPurchaseQty, (productPurchaseQty).mul(productPrice), msg.sender);
@@ -101,10 +101,10 @@ PullPayment
     function addProduct(uint productSku,bytes32 productName,uint productQuantity,bytes32 productDescription,uint productPrice,bytes32 productImage)
     public
     onlyOwner
-    isNotAnItem(productSku)
+    isNotACrudItem(productSku)
     returns(uint)
     {
-      uint index= super.insertItem(productSku,productName,productQuantity,productDescription,productPrice,productImage);
+      uint index= super.insertCrudItem(productSku,productName,productQuantity,productDescription,productPrice,productImage);
       //emit LogAddProduct(store_name, id, _name);
       return(index);
     }
@@ -112,10 +112,10 @@ PullPayment
     function removeProduct(uint productSku)
     public
     onlyOwner
-    isAnItem(productSku)
+    isACrudItem(productSku)
     returns(uint)
     {
-      uint index=super.deleteItem(productSku);
+      uint index=super.deleteCrudItem(productSku);
       //emit LogRemoveProduct(store_name, id, products[id].name);
       return(index);
     }
@@ -125,25 +125,25 @@ PullPayment
     view
     returns(uint count)
     {
-      return super.getItemCount();
+      return super.getCrudItemCount();
     }
 
     function getProduct(uint productSku)
       public
-      isAnItem(productSku)
+      isACrudItem(productSku)
       view
       returns(bytes32 productName, uint productQuantity, bytes32 productDescription, uint productPrice, bytes32 prouctImage, uint index)
     {
-      return(super.getItem(productSku));
+      return(super.getCrudItem(productSku));
     }
 
     function getProductQuantityPrice(uint productSku)
       public
-      isAnItem(productSku)
+      isACrudItem(productSku)
       view
       returns(uint productQuantity, uint productPrice)
     {
-      return(super.getItemQuantityPrice(productSku));
+      return(super.getCrudItemQuantityPrice(productSku));
     }
 
     function getProductAtIndex(uint index)
@@ -151,27 +151,27 @@ PullPayment
       view
       returns(uint productSku)
     {
-      return (super.getItemAtIndex(index));
+      return (super.getCrudItemAtIndex(index));
     }
 
     function updateProductPrice (uint productSku, uint updatedUnitPrice)
     public
     onlyOwner
-    isAnItem(productSku)
+    isACrudItem(productSku)
     returns(bool success)
     {
       emit LogStoreUpdatePrice(productSku, updatedUnitPrice);
-      return(super.updateItemPrice(productSku, updatedUnitPrice));
+      return(super.updateCrudItemPrice(productSku, updatedUnitPrice));
     }
 
     function updateProductQuantity (uint productSku, uint256 updatedQuantity)
     public
     onlyOwner
-    isAnItem(productSku)
+    isACrudItem(productSku)
     returns(bool success)
     {
       emit LogStoreUpdateQuantity(productSku, updatedQuantity);
-      return(super.updateItemQuantity(productSku, updatedQuantity));
+      return(super.updateCrudItemQuantity(productSku, updatedQuantity));
     }
 
     // Fallback function - Called if other functions don't match call or

@@ -5,51 +5,52 @@ pragma solidity ^0.4.24;
 
 import "truffle/Assert.sol";
 import "truffle/DeployedAddresses.sol";
-import "./../contracts/StoreCrud.sol";
+import "./../contracts/CrudStore.sol";
 
-contract TestStoreCrud {
+contract TestCrudStore is CrudStore {
 
-  StoreCrud storecrud = StoreCrud(DeployedAddresses.StoreCrud());
+  CrudStore crudstore = CrudStore(DeployedAddresses.CrudStore());
   uint index;
 
-  function testInsertStore() public {
-    storecrud.insertStore(0x01,"store 1");
-    storecrud.insertStore(0x02,"store 2");
-    storecrud.insertStore(0x03,"store 3");
-    storecrud.insertStore(0x04,"store 4");
-    storecrud.insertStore(0x05,"store 5");
+  function testInsertCrudStore() public {
+
+    insertCrudStore(0x01,"store 1");
+    insertCrudStore(0x02,"store 2");
+    insertCrudStore(0x03,"store 3");
+    insertCrudStore(0x04,"store 4");
+    insertCrudStore(0x05,"store 5");
     //try insert already existing store, tbd with js
-    Assert.equal(uint256(5), storecrud.getStoreCount(), "5 stores inserted correctly.");
+    Assert.equal(uint256(5), getCrudStoreCount(), "5 stores inserted correctly.");
   }
 
-  function testGetStore() public {
+  function testGetCrudStore() public {
     bytes32 recStoreName;
     bytes32 expectedStoreName = "store 2";
     //try request not a store, tbd with js
-    (recStoreName, index) = storecrud.getStore(0x02);
+    (recStoreName, index) = getCrudStore(0x02);
     Assert.equal(bytes32(recStoreName), bytes32(expectedStoreName), "recovered and expected storeName should match");
   }
 
 
-  function testGetStoreAtIndex() public {
+  function testGetCrudStoreAtIndex() public {
     address expectedStoreAddress = 0x02;
-    address recStoreAddress = storecrud.getStoreAtIndex(index);
+    address recStoreAddress = getCrudStoreAtIndex(index);
     Assert.equal(recStoreAddress, expectedStoreAddress, "recovered and expected storeName should match");
   }
 
-  function testDeleteStore() public {
-    storecrud.deleteStore(0x01);
-    storecrud.deleteStore(0x05);
+  function testDeleteCrudStore() public {
+    deleteCrudStore(0x01);
+    deleteCrudStore(0x05);
     // try delete not a store, tbd with js
-    Assert.equal(uint256(3), storecrud.getStoreCount(), "3 stores remaining.");
+    Assert.equal(uint256(3), getCrudStoreCount(), "3 stores remaining.");
 
   }
 
-  function testStoreCount() public {
-    storecrud.deleteStore(0x02);
-    storecrud.deleteStore(0x03);
-    storecrud.deleteStore(0x04);
-    Assert.equal(uint256(0), storecrud.getStoreCount(), "0 store remaining.");
+  function testCrudStoreCount() public {
+    deleteCrudStore(0x02);
+    deleteCrudStore(0x03);
+    deleteCrudStore(0x04);
+    Assert.equal(uint256(0), getCrudStoreCount(), "0 store remaining.");
   }
 
 }
