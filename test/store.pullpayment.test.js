@@ -82,13 +82,13 @@ contract('Store Pull Payment js tests', async (accounts) => {
 */
 
 
-  it("balance of store owner in the escrow of the store should be 0.", async () => {
+  it("initial balance of store owner in the escrow of the store should be 0.", async () => {
     //marketplarketplace = await Store.deployed({from : storeOwner});
     const paymentsToAccount0 = await store.payments(storeOwner);
     paymentsToAccount0.should.be.bignumber.equal(amount0);
   })
 
-  it("balance of store owner in the escrow of the store should be 2 ether.", async () => {
+  it("after purchase, balance of store owner in the escrow of the store should be 2 ether.", async () => {
     //let instanceMarketplace = await Store.deployed({from : storeOwner});
     //let idProduct2 = await store.addProduct("Yellow Bike", 10, "A nice Yellow Bike", amount1, {from: storeOwner });
     await store.purchaseProduct (111111,2,{ value: amount3, from: alice });
@@ -162,21 +162,17 @@ contract('Store Pull Payment js tests', async (accounts) => {
     assert.equal(finalBalanceOfEscrow.toString(),0,"Escrow is empty");
   })
 
-  it("user with role marketplaceAdministrator or no role can not recover funds from escrow.", async () => {
+  it("marketplaceAdministrator can not recover funds from store escrow.", async () => {
     assert.equal(await marketplace.hasRole(marketplaceOwner,MKT_ROLE_ADMIN),true,
     "marketplaceOwner should not have the role marketplaceAdmin");
     await tryCatch(store.withdrawPayments({from: marketplaceOwner}), errTypes.revert);
-    await tryCatch(store.withdrawPayments({from: alice}), errTypes.revert);
+    //await tryCatch(store.withdrawPayments({from: alice}), errTypes.revert);
   })
 
-
-/*
-  it("store user can not withdrawPayments. must be reverted.", async () => {
-    //let instanceMarketplace = await Store.deployed({from: owner});
-    //await store.purchaseProduct (0, 1, { value: amount2, from: alice });
-    //let bounty = await store.payments(owner, {from: owner });
+  it("a user can not recover funds from store escrow.", async () => {
+    assert.equal(await marketplace.hasRole(marketplaceOwner,MKT_ROLE_ADMIN),true,
+    "marketplaceOwner should not have the role marketplaceAdmin");
     await tryCatch(store.withdrawPayments({from: alice}), errTypes.revert);
   })
-*/
 
 })

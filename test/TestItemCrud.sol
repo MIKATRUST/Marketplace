@@ -70,13 +70,27 @@ contract TestItemCrud {
 
   }
 
+  function testUpdateItemQuantity() public {
+    bool ret = itemcrud.updateItemQuantity(111114,2);
+    Assert.equal(ret, true, "update function should return true.");
+    (,uint itemQuantity,,,,) = itemcrud.getItem(111114);
+    Assert.equal(uint(2), itemQuantity, "Quantity updated should be 2.");
+  }
+
+  function testUpdateItemPrice() public {
+    (,,,uint itemPrice,,) = itemcrud.getItem(111114);
+    Assert.equal(itemPrice, 14, "price initialized to 14.");
+    bool ret = itemcrud.updateItemPrice(111114,4);
+    Assert.equal(ret, true, "update function should return true.");
+    (,,,itemPrice,,)  = itemcrud.getItem(111114);
+    Assert.equal(itemPrice, 4, "updated price should be 4.");
+  }
+
   function testItemCount() public {
     itemcrud.deleteItem(111112);
     itemcrud.deleteItem(111113);
     itemcrud.deleteItem(111114);
     Assert.equal(uint256(0), itemcrud.getItemCount(), "0 store remaining.");
   }
-
-  //TBD : add test of updateQuantity
 
 }

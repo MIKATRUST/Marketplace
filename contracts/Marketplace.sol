@@ -51,8 +51,7 @@ StoreCrud
 
   function createStore(bytes32 storeName)
   public
-  //isNotAContract()
-  //isApprovedStoreOwner(msg.sender)
+  whenNotPaused
   onlyRole(MKT_ROLE_APPROVED_STORE_OWNER)
   returns(address)
   {
@@ -66,6 +65,7 @@ StoreCrud
 
   function addRoleAdministrator (address operator)
   public
+  whenNotPaused
   onlyRole(MKT_ROLE_ADMIN)
   {
     super.addRole(operator, MKT_ROLE_ADMIN);
@@ -75,6 +75,7 @@ StoreCrud
 
   function removeRoleAdministrator (address operator)
   public
+  whenNotPaused
   onlyRole(MKT_ROLE_ADMIN)
   //notForMyself(user)
   //atLeast1Admin ()
@@ -86,6 +87,7 @@ StoreCrud
 
   function addRoleApprovedStoreOwner (address operator)
   public
+  whenNotPaused
   onlyRole(MKT_ROLE_ADMIN)
   {
     super.addRole(operator, MKT_ROLE_APPROVED_STORE_OWNER);
@@ -94,6 +96,7 @@ StoreCrud
 
   function removeRoleApprovedStoredOwner (address operator)
   public
+  whenNotPaused
   onlyRole(MKT_ROLE_ADMIN)
   {
     super.removeRole(operator, MKT_ROLE_APPROVED_STORE_OWNER);
@@ -103,6 +106,7 @@ StoreCrud
   function hasRole(address operator, string role)
   public
   view
+  whenNotPaused
   returns(bool)
   {
     return(super.hasRole(operator, role));
@@ -121,6 +125,7 @@ StoreCrud
   function getStoreCount()
     public
     constant
+    whenNotPaused
     returns(uint count)
   {
     return(super.getStoreCount());
@@ -129,6 +134,7 @@ StoreCrud
   function getStoreAtIndex(uint index)
     public
     constant
+    whenNotPaused
     returns(address storeAddress)
   {
     return super.getStoreAtIndex(index);
@@ -137,6 +143,7 @@ StoreCrud
   function getStore(address storeAddress)
     public
     constant
+    whenNotPaused
     isAStore(storeAddress)
     returns(bytes32 storeName, uint index)
   {

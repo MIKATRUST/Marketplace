@@ -3,27 +3,53 @@ pragma solidity ^0.4.24;
 //import "./Marketplace.sol";
 //import "./LCrud.sol";
 import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import 'openzeppelin-solidity/contracts/lifecycle/Pausable.sol';
+import 'openzeppelin-solidity/contracts/lifecycle/Destructible.sol';
 import "./../contracts/ItemCrud.sol";
 import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 import 'openzeppelin-solidity/contracts/payment/PullPayment.sol';
 
 contract Store is
 Ownable,
+Pausable,
+Destructible,
 ItemCrud,
 PullPayment
  {
     using SafeMath for uint256;
     //address public owner; // store owner we use owne of ownable
 
-    //Events
-    //To be done
+    //Event
+    // Events - publicize actions to external listeners
+    event LogStoreCreate(address operator);
+    event LogStoreDelete(address operator); // not used yet
+    event LogStoreAddProduct(uint sku);
+    event LogStoreRemoveProduct(uint sku);
+    event LogStoreUpdatePrice(uint _sku, uint256 _updatedUnitPrice);
+    event LogStoreUpdateQuantity(uint _sku, uint256 _updatedQuantity);
+    event LogUpdateDescription(uint _sku, bytes32 updatedDescription);
+    event LogPurchaseProduct(uint sku, uint quantity, uint256 totalPrice, address customerAddress);
 
     //Modifiers
-    modifier giveBackChange(uint256 _productSku, uint256 _productQuantity) {
     //refund them after pay for item (why it is before, _ checks for logic before func)
+    modifier giveBackChange(uint256 _productSku, uint256 _productQuantity) {
     _;
     (,,,uint productPrice,,) = getProduct(_productSku);
     msg.sender.transfer(msg.value - productPrice.mul(_productQuantity));
+    }
+
+    modifier enoughStock (uint256 _productSku, uint256 _productPurchaseQty) {
+    (,uint productQuantity,,,,) = getProduct(_productSku);
+    require(productQuantity>=_productPurchaseQty,
+    "not enought stock, revert.");
+    _;
+    }
+
+    modifier paidEnough(uint256 _productSku, uint256 _productPurchaseQty){
+    (,,,uint productPrice,,) = getProduct(_productSku);
+    require(msg.value >= (productPrice.mul(_productPurchaseQty)),
+    "not paid enought, revert.");
+    _;
     }
 
     constructor()
@@ -32,9 +58,6 @@ PullPayment
     ItemCrud()
     PullPayment()
     {
-      //super.transferOwnership(tx.origin);
-      //not the marketplace but the caller to marketplace.createStore()
-      //owner = tx.origin; // à refacto avec ownable
       super.transferOwnership(tx.origin);
     }
 
@@ -49,26 +72,19 @@ PullPayment
     function purchaseProduct (uint256 productSku, uint256 productPurchaseQty)
     public
     payable
-//    forSale (id)
-//    enoughStock (id, quantity)
-//    paidEnough(id, quantity)
+    enoughStock(productSku, productPurchaseQty)
+    paidEnough(productSku, productPurchaseQty)
     giveBackChange(productSku, productPurchaseQty)
     {
-      //update quantity in store
-      //get quantity
-      //calculate remianing > updata quantity
-
-      (,uint productQty,,uint productPrice,,) = getProduct(productSku);
-
-      updateProductQuantity (productSku, productQty.sub(productPurchaseQty));
-      //bool ret = updateProductQuantity (productSku,uint(3));
-
+      (uint productQty,uint productPrice) = getProductQuantityPrice(productSku);
+      super.updateItemQuantity(productSku, productQty.sub(productPurchaseQty));
+      //updateProductQuantity(productSku, productQty.sub(productPurchaseQty));
       super.asyncTransfer(owner,(productPurchaseQty).mul(productPrice));
-
-      //emit LogPurchaseProduct(id, quantity, (quantity.mul(products[id].price)), msg.sender);
+      //emit LogPurchaseProduct(productSku, productPurchaseQty, (productPurchaseQty).mul(productPrice), msg.sender);
     }
 
     function withdrawPayments ()
+    onlyOwner //Only store owner
     public
     {
       super.withdrawPayments();
@@ -84,6 +100,8 @@ PullPayment
 
     function addProduct(uint productSku,bytes32 productName,uint productQuantity,bytes32 productDescription,uint productPrice,bytes32 productImage)
     public
+    onlyOwner
+    isNotAnItem(productSku)
     returns(uint)
     {
       uint index= super.insertItem(productSku,productName,productQuantity,productDescription,productPrice,productImage);
@@ -93,6 +111,8 @@ PullPayment
 
     function removeProduct(uint productSku)
     public
+    onlyOwner
+    isAnItem(productSku)
     returns(uint)
     {
       uint index=super.deleteItem(productSku);
@@ -102,7 +122,7 @@ PullPayment
 
     function getProductCount()
     public
-    constant
+    view
     returns(uint count)
     {
       return super.getItemCount();
@@ -110,32 +130,48 @@ PullPayment
 
     function getProduct(uint productSku)
       public
-      //sku exists
-      constant
+      isAnItem(productSku)
+      view
       returns(bytes32 productName, uint productQuantity, bytes32 productDescription, uint productPrice, bytes32 prouctImage, uint index)
     {
       return(super.getItem(productSku));
     }
 
+    function getProductQuantityPrice(uint productSku)
+      public
+      isAnItem(productSku)
+      view
+      returns(uint productQuantity, uint productPrice)
+    {
+      return(super.getItemQuantityPrice(productSku));
+    }
+
     function getProductAtIndex(uint index)
       public
-      constant
+      view
       returns(uint productSku)
     {
       return (super.getItemAtIndex(index));
     }
 
-    function updateProductPrice (uint productSku, uint productPrice)
+    function updateProductPrice (uint productSku, uint updatedUnitPrice)
     public
+    onlyOwner
+    isAnItem(productSku)
     returns(bool success)
     {
-      return(super.updateItemPrice(productSku, productPrice));
+      emit LogStoreUpdatePrice(productSku, updatedUnitPrice);
+      return(super.updateItemPrice(productSku, updatedUnitPrice));
     }
 
-    function updateProductQuantity (uint productSku, uint256 productQuantity) public
+    function updateProductQuantity (uint productSku, uint256 updatedQuantity)
+    public
+    onlyOwner
+    isAnItem(productSku)
     returns(bool success)
     {
-      return(super.updateItemQuantity(productSku, productQuantity));
+      emit LogStoreUpdateQuantity(productSku, updatedQuantity);
+      return(super.updateItemQuantity(productSku, updatedQuantity));
     }
 
     // Fallback function - Called if other functions don't match call or

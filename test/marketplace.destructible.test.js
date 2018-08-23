@@ -1,3 +1,5 @@
+//How to test for throwing require, revertt
+//https://www.reddit.com/r/ethdev/comments/83jms0/how_do_i_test_for_requires_throwing_revert_truffle/
 
 const Marketplace = artifacts.require("Marketplace");
 

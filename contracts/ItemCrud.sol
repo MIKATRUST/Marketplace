@@ -56,11 +56,11 @@ contract ItemCrud {
   {
     //if(isItem(itemSku)) throw;
     itemStructs[itemSku].itemName = itemName;
-    itemStructs[itemSku].itemQuantity   = itemQuantity;
-    itemStructs[itemSku].itemDescription   = itemDescription;
+    itemStructs[itemSku].itemQuantity = itemQuantity;
+    itemStructs[itemSku].itemDescription = itemDescription;
     itemStructs[itemSku].itemPrice = itemPrice;
     itemStructs[itemSku].itemImage = itemImage;
-    itemStructs[itemSku].index     = itemIndex.push(itemSku)-1;
+    itemStructs[itemSku].index = itemIndex.push(itemSku)-1;
     emit LogNewItem(
       itemSku,
       itemStructs[itemSku].index,
@@ -103,7 +103,6 @@ contract ItemCrud {
     constant
     returns(bytes32 itemName, uint itemQuantity, bytes32 itemDescription, uint itemPrice, bytes32 itemImage, uint index)
   {
-    //if(!isItem(itemSku)) throw;
     return(
       itemStructs[itemSku].itemName,
       itemStructs[itemSku].itemQuantity,
@@ -113,12 +112,22 @@ contract ItemCrud {
       itemStructs[itemSku].index);
   }
 
+  function getItemQuantityPrice(uint itemSku)
+    public
+    isAnItem(itemSku)
+    constant
+    returns(uint itemQuantity, uint itemPrice)
+  {
+    return(
+      itemStructs[itemSku].itemQuantity,
+      itemStructs[itemSku].itemPrice);
+  }
+
   function updateItemPrice(uint itemSku, uint itemPrice)
     public
-    isNotAnItem(itemSku)
+    isAnItem(itemSku)
     returns(bool success)
   {
-    //if(!isItem(itemSku)) throw;
     itemStructs[itemSku].itemPrice = itemPrice;
     emit LogUpdateItem(
       itemSku,
@@ -136,7 +145,6 @@ contract ItemCrud {
     isAnItem(itemSku)
     returns(bool success)
   {
-    //if(!isItem(itemSku)) throw;
     itemStructs[itemSku].itemQuantity = itemQuantity;
     emit LogUpdateItem(
       itemSku,
