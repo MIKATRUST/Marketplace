@@ -34,6 +34,14 @@ CrudStore
   string constant MKT_ROLE_APPROVED_STORE_OWNER = 'marketplaceApprovedStoreOwner';
 
   uint256 nAdmin = 0; //number of operator having the role MKT_ROLE_ADMIN
+
+  //temporary variables, dynamic arrays, to refacto with CRUD user
+  address[] marketplaceAdministrators;
+  address[] approvedStoreOwners;
+
+  /**
+  * Events - publicize actions to external listeners
+  */
   event LogNewMarketplace(address _requester, bytes32 _name);
   event LogNewStore(address _req, address _store); // do not change emitted variable name, important for js testing
   event LogAddedRoleAdministrator(address _requester, address _operator);
@@ -96,6 +104,7 @@ CrudStore
   onlyRole(MKT_ROLE_ADMIN)
   {
     super.addRole(operator, MKT_ROLE_ADMIN);
+    marketplaceAdministrators.push(operator);
     nAdmin++;
     emit LogAddedRoleAdministrator(msg.sender, operator);
   }
@@ -115,6 +124,7 @@ CrudStore
   {
     super.removeRole(operator, MKT_ROLE_ADMIN);
     nAdmin--;
+    //TBD : update CRUD user
     emit LogDeletedRoleAdministrator(msg.sender, operator);
   }
 
@@ -131,6 +141,7 @@ CrudStore
   onlyRole(MKT_ROLE_ADMIN)
   {
     super.addRole(operator, MKT_ROLE_APPROVED_STORE_OWNER);
+    approvedStoreOwners.push(operator);
     emit LogAddedRoleApprovedStoreOwner(msg.sender, operator);
   }
 
@@ -147,6 +158,7 @@ CrudStore
   onlyRole(MKT_ROLE_ADMIN)
   {
     super.removeRole(operator, MKT_ROLE_APPROVED_STORE_OWNER);
+    //TBD : update CRUD user
     emit LogDeletedRoleApprovedStoreOWner(msg.sender, operator);
   }
 
@@ -212,7 +224,7 @@ CrudStore
   /**
   * @dev Get addresses of the store referenced in the marketplace.
   * @dev Returns an array of addresses of the stores.
-  * @dev //Temporary function to accelerate, not indexed
+  * @dev Temporary function to accelerate, not indexed
   */
   function getStores()
     public
@@ -226,6 +238,46 @@ CrudStore
         stores[i]=getStoreAtIndex(i);
     }
     return stores;
+  }
+
+  /**
+  * @dev Get addresses of the administrators of the marketplace.
+  * @dev Returns an array of addresses of the administrators.
+  * @dev Temporary function to accelerate dev onf front end, not indexed
+  * @dev Refacto needed, create a CRUD user
+  */
+  function getMarketplaceAdministrators()
+    public
+    constant
+    whenNotPaused
+    returns(address[])
+  {
+    uint length = marketplaceAdministrators.length;
+    address[] memory stores = new address[](length);
+    for (uint i = 0; i < length; i++) {
+        stores[i]=marketplaceAdministrators[i];
+    }
+    return marketplaceAdministrators;
+  }
+
+  /**
+  * @dev Get addresses of the approved store owners.
+  * @dev Returns an array of addresses of the approved store owners.
+  * @dev Temporary function to accelerate dev of front end, not indexed
+  * @dev Refacto needed, create a CRUD user
+  */
+  function getApprovedStoreOwners()
+    public
+    constant
+    whenNotPaused
+    returns(address[])
+  {
+    uint length = approvedStoreOwners.length;
+    address[] memory stores = new address[](length);
+    for (uint i = 0; i < length; i++) {
+        stores[i]=approvedStoreOwners[i];
+    }
+    return marketplaceAdministrators;
   }
 
   /**
