@@ -16,44 +16,27 @@ matters.
 
 ### Lifetime
 
-///////!!! to be done
-//`auto_deprecation` - We have implemented a watchdog mechanism Provides a mechanism
-//for automatic expiration of a contract
-//interface after some period of time has elapsed.
-//[lifetime/auto_deprecation.sol](lifetime/auto_deprecation.sol)
+`auto_deprecation` - Provide a method for automatic expiration of a contract. Not implemented yet.
 
-`destructible` - Provides a method for the creator of a contract to destroy it.
-[zeppelin/lifecycle/Destructible.sol](zeppelin/lifecycle/Destructible.sol)
-
-To check is the contract was effectively destroyed : https://stackoverflow.com/questions/37644395/how-to-find-out-if-an-ethereum-address-is-a-contract
-eth.getCode("0xbfb2e296d9cf3e593e79981235aed29ab9984c0f")
+`destructible` - Provide a method to destroy the contract. Implemented.
 
 ### Maintenance
 
-`update` - Provides a method for the creator of a contract to update it to a
-newer version without invalidating the address.
-[contracts/Migrations.sol](contracts/Migrations.sol)
+`update` - Provides a method for the creator of the contract to update it to a
+newer version without invalidating the address. Implemented.
 
-//`data_segregation` - Segregates a contract and its data so as to avoid costly
-//data migrations.
-//[maintenance/data_segregation.sol](maintenance/data_segregation.sol)
+`data_segregation` - Provide a way to separate business logic and data so as to avoid costly updates. Not implemented yet.
 
 ### Ownership
-
-`ownable` - Limits access to certain functions to only the owner of the contract.
-[zeppelin/ownership/Ownable.sol](zeppelin/ownership/Ownable.sol)
+`ownable`,`Role-Based Access Control` - The ownable and RBAC design patterns were implemented to limit access to certain
+functions to only the owner of the contract or given groups like the marketplace administrators or the approved stores owners. Implemented.
 
 ### Security
-
 `circuit breaker` - The circuit breaker pattern allows the owner to pause or
-unpause a contract by a runtime toggle. Based on Open Zeppelin.
-[zeppelin/lifecycle/Pausable.sol](zeppelin/lifecycle/Pausable.sol)
+unpause a contract by a runtime toggle. Implemented.
 
-`revert` - The revert pattern has been implemented in the fallback function to
-automatically rejects all ether sent to a non existing function of the contract.
-[contracts/store.sol](contracts/store.sol)
-[contracts/marketplace.sol](contracts/marketplace.sol)
+`revert` - The revert pattern in the fallback function allows to
+automatically rejects all ether sent to a non existing function of the contract. Implemented.
 
-//`speed_bump` - The speed bump pattern limits how often a function can be called
-//to deliberately slow down certain functions.
-//[security/speed_bump.sol](security/speed_bump.sol)
+`speed_bump` - The speed bump pattern limits how often a function can be called
+to deliberately slow down certain functions. Not implemented yet.

@@ -33,10 +33,9 @@ contract('MarketPlace Destructible js tests', async (accounts) => {
     }), errTypes.revert);
   })
 
-  //V2 implement revenue sharing betweenn the stores and the marketplace
-  it("testing fallback function, tentative to send ether to non existing function of the marketplace should be reverted", async () => {
+  it("testing fallback function, tentative to send ether to no payable function should be reverted", async () => {
     let marketplace = await Marketplace.deployed();
-    await tryCatch(marketplace.aNiceFunctionThatDoesNotExit({
+    await tryCatch(marketplace.getStoreCount({
       from: alice,
       value: amount1
     }), errTypes.revert);

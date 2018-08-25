@@ -145,12 +145,12 @@ contract('marketplace.stores create/retrieve/delete stores js tests, ', async (a
     assert.equal(ret[0].toNumber(), 0, "stock of sku 999999 should be 0");
   })
 
-  it("create/retrieve numerous stores", async () => {
+  it("create/retrieve 10 stores", async () => {
     await marketplace.addRoleApprovedStoreOwner(storeOwner, {
       from: marketplaceOwner
     });
 
-    //create stores
+    //create stores in the blockchain
     for (let i = 0; i < storeCreateCount; i++) {
       let storeIndex = i;
       let storeName = `Store #${i}`;
@@ -171,36 +171,24 @@ contract('marketplace.stores create/retrieve/delete stores js tests, ', async (a
       let newStore = new StoreJs(storeAdr, storeIndex, storeName);
       expectedStoreCollection.push(newStore);
     }
-    assert.equal(await marketplace.getStoreCount(), storeCreateCount, `marketplace should have created stores`);
+    assert.equal(await marketplace.getStoreCount(), storeCreateCount,
+      `marketplace should have created stores`);
 
-    //retrieve stores
+    //retrieve stores from the blockchain and verify recovered data
     storeCount = await marketplace.getStoreCount();
-    assert.equal(storeCount, storeCreateCount, "storeCount expected and storeCount retrieved should be the same ");
+    assert.equal(storeCount, storeCreateCount,
+      "getStoreCount() should return the good number of stores");
+
+    let storesAddress = await marketplace.getStores();
+    assert.equal(storesAddress.length, expectedStoreCollection.length,
+      "getStores() should return the good number of stores");
+
     for (let i = 0; i < storeCount; i++) {
-
-      storeAdr = await marketplace.getStoreAtIndex(i);
-      storeInfo = await marketplace.getStore(storeAdr);
-      storeName = web3.toAscii(storeInfo[0]).replace(/\u0000/g, '');
-      let newStore = new StoreJs(storeAdr, i, storeName);
-      retrievedStoreCollection.push(newStore);
-    }
-
-    //check that recovered store are the same : name, address, indexed
-    assert.equal(expectedStoreCollection.length, retrievedStoreCollection.length,
-      "array size of expectedStoreCollection and retrievedStoreCollection should be the same");
-    for (let i = 0; i < storeCount; i++) {
-
       var expectedStore = expectedStoreCollection.pop();
-      var retrievedStore = retrievedStoreCollection.pop();
-      assert.equal(expectedStore['address'], retrievedStore['address'], "address should match");
-      assert.equal(expectedStore['index'], retrievedStore['index'], "index should match");
-      assert.equal(expectedStore['name'], retrievedStore['name'], "address should match");
-      store = await Store.at(retrievedStore['address']);
-      assert(store !== undefined, "store instance should be defined")
-      assert.equal(await store.isAvailable(), true, "store should be available");
-
+      let storeInfo = await marketplace.getStore(expectedStore['address']);
+      assert.equal(expectedStore['name'], web3.toAscii(storeInfo[0]).replace(/\u0000/g, ''),
+        "retrieved name for each store should match the expected name.");
     }
-
   })
 
   /*
