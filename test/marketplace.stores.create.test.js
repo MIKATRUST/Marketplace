@@ -45,35 +45,37 @@ contract('marketplace.stores create/retrieve/delete stores js tests, ', async (a
 
   beforeEach('setup contract for each test, marketplaceOwner approve 1 store owner', async function() {
     //get marketplace instance
-    marketplace = await Marketplace.new({from: marketplaceOwner});
+    marketplace = await Marketplace.new({
+      from: marketplaceOwner
+    });
   })
 
   it("user with no role should not be able able to create a store ", async () => {
-    //marketplace = await Marketplace.new({from: marketplaceOwner});
     var eventEmitted = false
     var event = marketplace.LogNewStore()
     await event.watch((err, res) => {
       addressCreatedStore = res.args._store.toString(16)
       eventEmitted = true
     })
-
-    await tryCatch(marketplace.createStore("bob", {from: bob}), errTypes.revert);
+    await tryCatch(marketplace.createStore("bob", {
+      from: bob
+    }), errTypes.revert);
     assert.equal(eventEmitted, false, 'store was not created, event LogNewStore should not be triggered');
   })
 
   it("user with role marketplaceAdministrator should not be able able to create a store ", async () => {
     //await marketplace.addRoleApprovedStoreOwner(storeOwner, {from: marketplaceOwner});
     assert.equal(await marketplace.hasRole(marketplaceOwner, MKT_ROLE_ADMIN), true,
-    "marketplaceOwner has role MKT_ROLE_ADMIN.")
+      "marketplaceOwner has role MKT_ROLE_ADMIN.")
     var eventEmitted = false
     var event = marketplace.LogNewStore()
     await event.watch((err, res) => {
       addressCreatedStore = res.args._store.toString(16)
       eventEmitted = true
     })
-
-    await tryCatch(marketplace.createStore(bob, {from: bob}), errTypes.revert);
-
+    await tryCatch(marketplace.createStore(bob, {
+      from: bob
+    }), errTypes.revert);
     assert.equal(eventEmitted, false, "store was not created, event LogNewStore should not be triggered.");
   })
 
@@ -108,13 +110,17 @@ contract('marketplace.stores create/retrieve/delete stores js tests, ', async (a
   })
 
   it("store owner can update product price. ", async () => {
-    let val = await store.updateProductPrice(999999,amount05,{from: storeOwner});
+    let val = await store.updateProductPrice(999999, amount05, {
+      from: storeOwner
+    });
     let retPQ = await store.getProductQuantityPrice(999999);
     assert.equal(retPQ[1], amount05, "product price should have been updated");
   })
 
   it("store owner can update product quantity. ", async () => {
-    let val = await store.updateProductQuantity(999999,5,{from: storeOwner});
+    let val = await store.updateProductQuantity(999999, 5, {
+      from: storeOwner
+    });
     let retPQ = await store.getProductQuantityPrice(999999);
     assert.equal(retPQ[0], 5, "product price should have been updated");
   })
@@ -131,7 +137,10 @@ contract('marketplace.stores create/retrieve/delete stores js tests, ', async (a
     assert.equal(await store.getProductCount(), 1, "store should have 1 product sku");
     let ret = await store.getProductQuantityPrice(999999);
     assert.equal(ret[0].toNumber(), 5, "stock of sku 999999 should be 5");
-    await store.purchaseProduct(999999, 5,{value: amount10,from: alice});
+    await store.purchaseProduct(999999, 5, {
+      value: amount10,
+      from: alice
+    });
     ret = await store.getProductQuantityPrice(999999);
     assert.equal(ret[0].toNumber(), 0, "stock of sku 999999 should be 0");
   })
@@ -178,7 +187,7 @@ contract('marketplace.stores create/retrieve/delete stores js tests, ', async (a
 
     //check that recovered store are the same : name, address, indexed
     assert.equal(expectedStoreCollection.length, retrievedStoreCollection.length,
-    "array size of expectedStoreCollection and retrievedStoreCollection should be the same");
+      "array size of expectedStoreCollection and retrievedStoreCollection should be the same");
     for (let i = 0; i < storeCount; i++) {
 
       var expectedStore = expectedStoreCollection.pop();

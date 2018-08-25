@@ -1,8 +1,5 @@
 pragma solidity ^0.4.24;
 
-// Strategy for using event injavascript
-//https://ethereum.stackexchange.com/questions/39171/how-to-check-events-in-truffle-tests
-
 import "truffle/Assert.sol";
 import "truffle/DeployedAddresses.sol";
 import "./../contracts/CrudItem.sol";
@@ -11,7 +8,7 @@ contract TestCrudItem is CrudItem{
 
   CrudItem cruditem = CrudItem(DeployedAddresses.CrudItem());
   uint index;
-  
+
   /*
   struct ItemStruct {
     bytes32 itemName;
@@ -22,8 +19,9 @@ contract TestCrudItem is CrudItem{
     uint index;
   }*/
 
+  //function insertCrudItem(uint itemSku, bytes32 itemName, uint itemQuantity,bytes32 itemDescription, uint itemPrice,bytes32 itemImage)
+
   function testInsertCrudItem() public {
-    //function insertCrudItem(uint itemSku, bytes32 itemName, uint itemQuantity,bytes32 itemDescription, uint itemPrice,bytes32 itemImage)
     insertCrudItem(111111,"item 1",1,"desc 1",11,"images/BIKE1.jpeg");
     insertCrudItem(111112,"item 2",2,"desc 2",12,"images/BIKE2.jpeg");
     insertCrudItem(111113,"item 3",3,"desc 3",13,"images/BIKE3.jpeg");

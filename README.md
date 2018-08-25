@@ -1,61 +1,62 @@
-What does your project do?
--How to set it up
--Run a local development server
+# Marketplace
 
-React tutorial : https://reactjs.org/docs/introducing-jsx.html
+The projeect Marketplace operating on the blockchain has been implemented. This central marketplace is managed from a business point of view by a group of administrators who can manage store owner. The group of approved store owners can create shops and manage products withins theses shops. Shopper can visit shops and buy products. Owner of the store can get funds from its store through a pull payment mechanism.
 
-see Zeppelin exemple : https://github.com/OpenZeppelin/openzeppelin-solidity
+## Prerequisites
+have git, Truffle and Ganache installed and running.
 
-see react auth exemple : https://github.com/truffle-box/react-auth-box
+Marketplace has been tested on Mac with the following software versions :
+```sh
+OS X Yosemite version 10.10.15
+node v8.11.3
+npm 6.1.0
+Truffle v4.1.13 (core: 4.1.13)
+Solidity v0.4.24 (solc-js)
+Ganache 1.1.0
+```
 
+Marketplace has been tested on Ubuntu with the following software versions:
+```sh
+Ubuntu 16.04
+node v8.11.4
+npm 5.6.0
+```
 
-Installation Ubuntu 16.04 sur virtual box
-https://medium.com/@tushar0618/install-ubuntu-16-04-lts-on-virtual-box-desktop-version-30dc6f1958d0
+## Getting Started
+Get the marketplace project and source code from github
+```sh
+git clone <URL>
+```
 
-Installation openzeppelin sur ubuntu
-git
-  npm install openzeppelin-solidity
+Navigate into the directory of the repository you just created.
+```sh
+cd <REPOSITORY-NAME>
+```
+verify that the current state of your repository and the files it contains.
+
+```sh
+ git status
+```
+
+To compile the contract, use
+```sh
 truffle compile
-truffle develop
-migrate
-test > bang, probleme avec les tests
-check version of truffle
+```
+To migrate the contract to Ganache, use
+```sh
+truffle migrate --reset
+```
+note that `--reset is advised to have a clean environment`
 
-Message "can not find module chai"
-sudo npm install -g mocha > bang, tjs le meme probleme
-sudo npm install --save chai
+To execute test, use
+```sh
+truffle test
+```
 
-OK below
-sudo npm install --save chai
-sudo npm install --save chai-bignumber
 
-truffle version
-should get
-  Truffle v4.1.13 (core: 4.1.13)
-  Solidity v0.4.24 (solc-js)
 
-node version Mac
-  node -v
-  v8.11.3
-    npm -v
-    6.1.0
 
-node version linux
-  v6.14.3
-    npm -v
-    3.10.10
 
-linux, update nodejs
-sudo apt-get install nodejs
-We still have the   v6.14.3
 
-version of linux
-cat/proc/version
-ubuntu 16.04.9
-
-How to Install Node.js on Ubuntu 16.04, latest node version
-from method 2 from here : https://www.layerstack.com/docs/tutorials/how-to-install-node-js-on-ubuntu-16-04-v2
-
-now:
-node -v = 8.11.4
-npm -v = 5.6.0
+## License
+Code released under the [MIT License](https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/LICENSE).

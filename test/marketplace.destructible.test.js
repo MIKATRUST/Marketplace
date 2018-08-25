@@ -28,32 +28,39 @@ contract('MarketPlace Destructible js tests', async (accounts) => {
 
   it("no role user should not be able to destroy the marketplace.", async () => {
     let marketplace = await Marketplace.deployed();
-    await tryCatch(marketplace.destroy({from: alice}), errTypes.revert);
+    await tryCatch(marketplace.destroy({
+      from: alice
+    }), errTypes.revert);
   })
 
   //V2 implement revenue sharing betweenn the stores and the marketplace
-  it("testing fallback function, tentative to send ether to non existing function of the marketplace should be reverted",async () => {
+  it("testing fallback function, tentative to send ether to non existing function of the marketplace should be reverted", async () => {
     let marketplace = await Marketplace.deployed();
-    await tryCatch(marketplace.aNiceFunctionThatDoesNotExit({from: alice, value: amount1}), errTypes.revert);
+    await tryCatch(marketplace.aNiceFunctionThatDoesNotExit({
+      from: alice,
+      value: amount1
+    }), errTypes.revert);
   })
 
   it("marketplaceAdministrator should be able to destroy the marketplace", async () => {
     let marketplace = await Marketplace.deployed();
     let contractAddress = marketplace.address;
-    await marketplace.destroy({from: marketplaceOwner});
+    await marketplace.destroy({
+      from: marketplaceOwner
+    });
     let contractCodeAfterDestroy = await web3.eth.getCode(contractAddress);
-    assert.equal(contractCodeAfterDestroy,"0x0","verify that the contract does not exist after destruction");
+    assert.equal(contractCodeAfterDestroy, "0x0", "verify that the contract does not exist after destruction");
   })
 
-/* TBD
-  it('owner must be able to destroy the contract and send balance to given recipient.', async function () {
-    let instance = await Store.deployed({from: accounts[0], value: web3.toWei('40', 'ether')});
-    let initBalance = web3.eth.getBalance(accounts[1]);
-    await instance.destroyAndSend(accounts[1],{from : owner});
-    let newBalance = web3.eth.getBalance(accounts[1]);
-    assert.isTrue(newBalance.greaterThan(initBalance));
-  });
-*/
+  /* TBD
+    it('owner must be able to destroy the contract and send balance to given recipient.', async function () {
+      let instance = await Store.deployed({from: accounts[0], value: web3.toWei('40', 'ether')});
+      let initBalance = web3.eth.getBalance(accounts[1]);
+      await instance.destroyAndSend(accounts[1],{from : owner});
+      let newBalance = web3.eth.getBalance(accounts[1]);
+      assert.isTrue(newBalance.greaterThan(initBalance));
+    });
+  */
 
 
 
