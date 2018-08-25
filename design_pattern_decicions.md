@@ -46,7 +46,7 @@ newer version without invalidating the address.
 ### Security
 
 `circuit breaker` - The circuit breaker pattern allows the owner to pause or
-unpause a contract by a runtime toggle.
+unpause a contract by a runtime toggle. Based on Open Zeppelin.
 [zeppelin/lifecycle/Pausable.sol](zeppelin/lifecycle/Pausable.sol)
 
 `revert` - The revert pattern has been implemented in the fallback function to

@@ -136,6 +136,21 @@ CrudStore
     return(super.getCrudStore(storeAddress));
   }
 
+  //Temporary function to accelerate, not indexed
+  function getStores()
+    public
+    constant
+    whenNotPaused
+    returns(address[])
+  {
+    uint length = getStoreCount();
+    address[] memory stores = new address[](length);
+    for (uint i = 0; i < length; i++) {
+        stores[i]=getStoreAtIndex(i);
+    }
+    return stores;
+  }
+
   //V2 TBD
   //-delete store
   //-get some revenue sharing from the stores

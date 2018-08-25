@@ -1,13 +1,18 @@
 pragma solidity ^0.4.24;
 
-//import "./Marketplace.sol";
-//import "./LCrud.sol";
+
 import '../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import '../node_modules/openzeppelin-solidity/contracts/lifecycle/Pausable.sol';
 import "./../contracts/CrudItem.sol";
 import '../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol';
 import '../node_modules/openzeppelin-solidity/contracts/payment/PullPayment.sol';
 
+/**
+ * @title Store
+ * @dev store contract, a store is instanciated each time a store is created from the marketplace contract
+ * @dev use a pull escrow to handle payment operation asynchronously instead of
+ * of send or transfer.
+ */
 contract Store is
 Ownable,
 Pausable,
@@ -83,6 +88,8 @@ PullPayment
       //emit LogPurchaseProduct(productSku, productPurchaseQty, (productPurchaseQty).mul(productPrice), msg.sender);
     }
 
+
+
     function withdrawPayments ()
     onlyOwner
     public
@@ -99,6 +106,13 @@ PullPayment
       return super.payments(_dest);
     }
 
+    /** @title Shape calculator. */
+    //contract shapeCalculator {
+        /** @dev Calculates a rectangle's surface and perimeter.
+          * @param productSku Width of the rectangle.
+          * @param productName Height of the rectangle.
+          * @return index of produt..
+          */
     function addProduct(uint productSku,bytes32 productName,uint productQuantity,bytes32 productDescription,uint productPrice,bytes32 productImage)
     public
     onlyOwner

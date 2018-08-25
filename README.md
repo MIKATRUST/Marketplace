@@ -2,6 +2,8 @@ What does your project do?
 -How to set it up
 -Run a local development server
 
+React tutorial : https://reactjs.org/docs/introducing-jsx.html
+
 see Zeppelin exemple : https://github.com/OpenZeppelin/openzeppelin-solidity
 
 see react auth exemple : https://github.com/truffle-box/react-auth-box
