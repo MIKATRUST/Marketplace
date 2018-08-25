@@ -8,9 +8,21 @@ import '../node_modules/openzeppelin-solidity/contracts/access/rbac/RBAC.sol';
 import '../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import '../node_modules/openzeppelin-solidity/contracts/lifecycle/Pausable.sol';
 import '../node_modules/openzeppelin-solidity/contracts/lifecycle/Destructible.sol';
-//import 'openzeppelin-solidity/contracts/payment/PullPayment.sol';
 
-//UserCrud
+/**
+ * @title Marketplace
+ * @dev The marketplace is managed by a group of administrator.
+ * The creator of the marketplace is a de-facto administrator.
+ * Administrator can add and remove the role of
+ * administrator for a given address. Administrator can add and remove the role
+ * of approved store owner. An approved store owner can create stores.
+ * @dev Marketplace is owned by the creator of the marketplace.
+ * Marketplace ownership can be transferred.
+ * @dev Store is pausable.
+ * @dev Store is destroyable.
+ * @dev To be considered for the next release : -get some revenue sharing from
+ * child stores. -Add store deletion.
+ */
 contract Marketplace is
 Ownable,
 Pausable,
@@ -30,35 +42,54 @@ CrudStore
   event LogDeletedRoleApprovedStoreOWner(address _requester, address _operator);
   event LogDestroyMarketplace(address _requester);
 
-/*
+  /**
+   * @dev Revert if tentative to remove the last administrator.
+   */
   modifier atLeast2Admin()
   {
     require (nAdmin > 2,
       "can not remove last Administrator.");
     _;
   }
-*/
+
+  /**
+   * @dev Constructor
+   */
   constructor()
   public
-
   Ownable()
   CrudStore()
   {
     super.addRole(msg.sender, MKT_ROLE_ADMIN);
   }
 
+  /**
+  * @dev Create a store. Store creation is restricted to user having the
+  * role MKT_ROLE_APPROVED_STORE_OWNER
+  * @dev The creator of the store should not be a contract, otherwise it will
+  * be reverted.
+  * @dev returns the address of the created store.
+  * @param storeName is the name of teh store.
+  */
   function createStore(bytes32 storeName)
   public
   whenNotPaused
   onlyRole(MKT_ROLE_APPROVED_STORE_OWNER)
   returns(address)
   {
+    require(msg.sender==tx.origin, "caller should not be a contract");
     address storeAddress = new Store();
     emit LogNewStore(msg.sender,storeAddress);
     insertCrudStore(storeAddress,storeName);
     return storeAddress;
   }
 
+  /**
+  * @dev Add role MKT_ROLE_ADMIN to a given operator. Use of this transaction
+  * is restricted to user having the role MKT_ROLE_ADMIN.
+  * @param operator is the address of the operator you are going to give the
+  * role MKT_ROLE_ADMIN.
+  */
   function addRoleAdministrator (address operator)
   public
   whenNotPaused
@@ -69,6 +100,12 @@ CrudStore
     emit LogAddedRoleAdministrator(msg.sender, operator);
   }
 
+  /**
+  * @dev Remove role MKT_ROLE_ADMIN to a given operator. Use of this transaction
+  * is restricted to user having the role MKT_ROLE_ADMIN.
+  * @param operator is the address of the operator you are going to remove the
+  * role MKT_ROLE_ADMIN.
+  */
   function removeRoleAdministrator (address operator)
   public
   whenNotPaused
@@ -81,6 +118,13 @@ CrudStore
     emit LogDeletedRoleAdministrator(msg.sender, operator);
   }
 
+  /**
+  * @dev Add role MKT_ROLE_APPROVED_STORE_OWNER to a given operator.
+  * Use of this transaction is restricted to user having the role
+  * MKT_ROLE_ADMIN.
+  * @param operator is the address of the operator you are going to give the
+  * role MKT_ROLE_APPROVED_STORE_OWNER.
+  */
   function addRoleApprovedStoreOwner (address operator)
   public
   whenNotPaused
@@ -90,6 +134,13 @@ CrudStore
     emit LogAddedRoleApprovedStoreOwner(msg.sender, operator);
   }
 
+  /**
+  * @dev Remove role MKT_ROLE_APPROVED_STORE_OWNER to a given operator.
+  * Use of this transaction is restricted to user having the role
+  * MKT_ROLE_ADMIN.
+  * @param operator is the address of the operator you are going to remove the
+  * role MKT_ROLE_ADMIN.
+  */
   function removeRoleApprovedStoredOwner (address operator)
   public
   whenNotPaused
@@ -99,6 +150,12 @@ CrudStore
     emit LogDeletedRoleApprovedStoreOWner(msg.sender, operator);
   }
 
+  /**
+  * @dev Check if an operator has a given role.
+  * @dev Returns true if the operator has effectively the given role.
+  * @param operator is the address of the operator.
+  * @param role is the role you want to check.
+  */
   function hasRole(address operator, string role)
   public
   view
@@ -108,6 +165,10 @@ CrudStore
     return(super.hasRole(operator, role));
   }
 
+  /**
+  * @dev Get the number of stores referenced the marketplace.
+  * @dev Returns the number of stores referenced in the marketplace.
+  */
   function getStoreCount()
     public
     constant
@@ -117,6 +178,11 @@ CrudStore
     return(super.getCrudStoreCount());
   }
 
+  /**
+  * @dev Get the address of a store stored at a fiven index of Crud Store.
+  * @dev Low level function, will be remove in futur release.
+  * @param index of the store.
+  */
   function getStoreAtIndex(uint index)
     public
     constant
@@ -126,6 +192,13 @@ CrudStore
     return super.getCrudStoreAtIndex(index);
   }
 
+  /**
+  * @dev Retrieve store information.
+  * @dev Low level function, will be remove in futur release.
+  * @param storeAddress is the address of teh stored.
+  * @dev Returns storeName The name of the store.
+  * @dev Returns index The index of the stors in Crud store.
+  */
   function getStore(address storeAddress)
     public
     constant
@@ -136,7 +209,11 @@ CrudStore
     return(super.getCrudStore(storeAddress));
   }
 
-  //Temporary function to accelerate, not indexed
+  /**
+  * @dev Get addresses of the store referenced in the marketplace.
+  * @dev Returns an array of addresses of the stores.
+  * @dev //Temporary function to accelerate, not indexed
+  */
   function getStores()
     public
     constant
@@ -151,10 +228,10 @@ CrudStore
     return stores;
   }
 
-  //V2 TBD
-  //-delete store
-  //-get some revenue sharing from the stores
-
+  /**
+  * @dev Destroy the marketplace. Operation can only be performed bu the owner
+  * of the marketplace.
+  */
   function destroy()
   public
   onlyOwner
@@ -163,7 +240,10 @@ CrudStore
     selfdestruct(owner);
   }
 
-  // Fallback function, sent ether to a non referenced function of this contract should be reverted
+  /**
+  * @dev Fallback function, sending ether to a non referenced function
+  * of this contract will be reverted .
+  */
   function () public {
       revert();
   }
