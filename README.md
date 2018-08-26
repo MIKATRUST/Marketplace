@@ -59,7 +59,7 @@ You should be able to see the front end of the Metacoin application by directing
 If you can see the metacoin site, everything should be fine, you can continue and go to the next step.
 Now you can stop the server
 
-### Step 3 : Inject the Marketplace project inside the limelabs-angular-box
+### Step 3 : Inject the Marketplace project inside the limelabs-angular-box truffle box
 Let's do some cleaning.
 ```sh
 cd ..
