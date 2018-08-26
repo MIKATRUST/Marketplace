@@ -23,30 +23,70 @@ npm 5.6.0
 ```
 
 ## Getting Started
-Get the marketplace project and source code from github
+### Step 0 : Get the marketplace project and test the smart contracts
+Create an empty "work" directory en change your working directory
 ```sh
-git clone https://github.com/MIKATRUST/Marketplace.git
+mkdir work
+cd work
 ```
-
-Navigate into the directory of the repository you just created.
+Get the sources for the project marketplace from github, compile, and test to verify that everything is fine :
 ```sh
+Get sources, install and test Marketplace smart contracts
+git clone -b server https://github.com/MIKATRUST/Marketplace.git
 cd Marketplace
-```
-
-To compile the contract, use
-```sh
 truffle compile
-```
-To migrate the contract to Ganache, use
-```sh
+start Ganache
 truffle migrate --reset
-```
-note that `--reset` is advised to have a clean environment if the case of several migration
-
-To execute test, use
-```sh
 truffle test
 ```
+Tests should be fine, if this is the case, you can continue the installation.
+### Step 2 : Install the limelabs-angular-box truffle box
+Follow the steps below to install the limelabs-angular-box. Please have a look at the truffle box doc at  https://truffleframework.com/boxes/limelabs-angular-box to install Angular.
+```sh
+cd ..
+mkdir ./limelabs-angular-box/
+cd ./limelabs-angular-box/
+truffle unbox LimelabsTech/angular-truffle-box
+Restart Ganache
+truffle compile (you will get warnings)
+truffle migrate
+truffle test
+ng serve
+```
+You should be able to see the front end of the Metacoin application by directing your web enabled browser to http://localhost:4200/
+If you can see the metacoin site, everything should be fine, you can continue and go to the next step.
+now you can stop the server
+
+### Step 3 : Inject the Marketplace project inside the limelabs-angular-box
+Let's do some cleaning.
+```sh
+cd ..
+rm -rf ./limelabs-angular-box/contracts
+rm -rf ./limelabs-angular-box/migrations
+rm -rf ./limelabs-angular-box/test
+rm -rf ./limelabs-angular-box/src
+```
+Then we inject Markeplace directories inside limelabs-angular-box :
+```sh
+cp -R ./Marketplace/contracts ./limelabs-angular-box/contracts
+cp -R ./Marketplace/migrations ./limelabs-angular-box/migrations
+cp -R ./Marketplace/test ./limelabs-angular-box/test
+cp -R ./Marketplace/src ./limelabs-angular-box/src
+cp -R ./Marketplace/node_modules ./limelabs-angular-box/node_modules
+cp -R ./Marketplace/node_modules/* ./limelabs-angular-box/node_modules/
+```
+Then we again
+```sh
+cd ./limelabs-angular-box/
+truffle compile
+truffle test
+truffle migrate --reset
+```
+We can now start the server and direct ou browser to http://localhost:4200/
+```sh
+ng serve
+```
+
 ## Architecture
 The marketplace is architectures around 5+ contracts :
 Marketplace.sol : to handle Marketplace business with the ability to create/instanciate store.
