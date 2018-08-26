@@ -270,12 +270,7 @@ CrudStore
     constant
     whenNotPaused
     returns(address[])
-  { /*
-    uint length = marketplaceAdministrators.length;
-    address[] memory adrAdministrators = new address[](length);
-    for (uint i = 0; i < length; i++) {
-        stores[i]=marketplaceAdministrators[i];
-    }*/
+  {
     return marketplaceAdministrators;
   }
 
@@ -290,12 +285,7 @@ CrudStore
     constant
     whenNotPaused
     returns(address[])
-  { /*
-    uint length = approvedStoreOwners.length;
-    address[] memory stores = new address[](length);
-    for (uint i = 0; i < length; i++) {
-        stores[i]=approvedStoreOwners[i];
-    }*/
+  {
     return approvedStoreOwners;
   }
 
