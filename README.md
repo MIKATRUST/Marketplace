@@ -24,14 +24,15 @@ npm 5.6.0
 
 ## Getting Started
 ### Step 0 : Get the marketplace project and test the smart contracts
-Create an empty "work" directory en change your working directory
+Create an empty "work" directory and change your working directory
 ```sh
 mkdir work
 cd work
 ```
-Get the sources for the project marketplace from github, compile, and test to verify that everything is fine :
+Get the sources for the Marketplace project from github.
+Compile and test to verify that everything works fine.
+Note : Please pay attention to the flag `-b server`
 ```sh
-Get sources, install and test Marketplace smart contracts
 git clone -b server https://github.com/MIKATRUST/Marketplace.git
 cd Marketplace
 truffle compile
@@ -40,6 +41,7 @@ truffle migrate --reset
 truffle test
 ```
 Tests should be fine, if this is the case, you can continue the installation.
+
 ### Step 2 : Install the limelabs-angular-box truffle box
 Follow the steps below to install the limelabs-angular-box. Please have a look at the truffle box doc at  https://truffleframework.com/boxes/limelabs-angular-box to install Angular.
 ```sh
@@ -53,9 +55,9 @@ truffle migrate
 truffle test
 ng serve
 ```
-You should be able to see the front end of the Metacoin application by directing your web enabled browser to http://localhost:4200/
+You should be able to see the front end of the Metacoin application by directing your web3 enabled browser to http://localhost:4200/
 If you can see the metacoin site, everything should be fine, you can continue and go to the next step.
-now you can stop the server
+Now you can stop the server
 
 ### Step 3 : Inject the Marketplace project inside the limelabs-angular-box
 Let's do some cleaning.
@@ -75,14 +77,14 @@ cp -R ./Marketplace/src ./limelabs-angular-box/src
 cp -R ./Marketplace/node_modules ./limelabs-angular-box/node_modules
 cp -R ./Marketplace/node_modules/* ./limelabs-angular-box/node_modules/
 ```
-Then we again
+Then we test again
 ```sh
 cd ./limelabs-angular-box/
 truffle compile
-truffle test
 truffle migrate --reset
+truffle test
 ```
-We can now start the server and direct ou browser to http://localhost:4200/
+We can now start the server. You should be able to see the front end of the Metacoin application by directing your web3 enabled browser to http://localhost:4200/
 ```sh
 ng serve
 ```
