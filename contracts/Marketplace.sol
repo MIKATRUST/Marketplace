@@ -145,6 +145,7 @@ CrudStore
     emit LogAddedRoleApprovedStoreOwner(msg.sender, operator);
   }
 
+
   /**
   * @dev Remove role MKT_ROLE_APPROVED_STORE_OWNER to a given operator.
   * Use of this transaction is restricted to user having the role
@@ -175,6 +176,24 @@ CrudStore
   returns(bool)
   {
     return(super.hasRole(operator, role));
+  }
+
+  /**
+  * @dev get primary role for an operator.
+  * @dev Returns the primary roles.
+  * @param operator is the address of the operator.
+  */
+  function getPrimaryRole(address operator)
+  public
+  view
+  whenNotPaused
+  returns(string)
+  {
+    if(hasRole(operator,MKT_ROLE_ADMIN))
+      return MKT_ROLE_ADMIN;
+    if(hasRole(operator,MKT_ROLE_APPROVED_STORE_OWNER))
+      return MKT_ROLE_APPROVED_STORE_OWNER;
+    return MKT_ROLE_SHOPPER;
   }
 
   /**
