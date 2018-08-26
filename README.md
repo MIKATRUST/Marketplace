@@ -91,18 +91,18 @@ ng serve
 
 ## Architecture
 The marketplace is architectures around 5+ contracts :
-Marketplace.sol : to handle Marketplace business with the ability to create/instanciate store.
+* Marketplace.sol : to handle Marketplace business with the ability to create/instanciate store.
 Store.sol : to handle product management and payment based on a pull payment approach to recover funds.
-CrudStore.sol : to handle Data Storage With Sequential Access, Random Access and Delete for stores in the contract Marketplace.Sol.
-CrudItem.sol : to handle Data Storage With Sequential Access, Random Access and Delete for products in the stores.
-Migrations.sol : to handle migration of contracts.
+* CrudStore.sol : to handle Data Storage With Sequential Access, Random Access and Delete for stores in the contract Marketplace.Sol.
+* CrudItem.sol : to handle Data Storage With Sequential Access, Random Access and Delete for products in the stores.
+* Migrations.sol : to handle migration of contracts.
 
-We made made an extensive use of EthPM asset, particularly from Open Zeppelin, here the lib / contract that were used in our project:
-Ownable : A contract to handle owning operation.
-RBAC.sol / Roles:.sol : A library used to manage addresses assigned to different user roles and an example Role-Based Access Control (RBAC) interface that demonstrates how to handle setters and getters for roles and addresses.
-PullPayment.sol / Escrow.sol : A contract that implement a pull payment system based on an escrow.
-Pausable : A contract that give the ability to pause/unpause the contract.
-SafeMath : Library for SafeMath operation
+We made made an extensive use of EthPM assets, particularly from Open Zeppelin, here the lib / contract that were used in our project:
+* SafeMath : Library for SafeMath operation
+* Ownable : A contract to handle owning operation.
+* RBAC.sol / Roles:.sol : A library used to manage addresses assigned to different user roles and an example Role-Based Access Control (RBAC) interface that demonstrates how to handle setters and getters for roles and addresses.
+* PullPayment.sol / Escrow.sol : A contract that implement a pull payment system based on an escrow.
+* Pausable : A contract that give the ability to pause/unpause the contract.
 
 ## License
 Code released under the [MIT License](https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/LICENSE).
