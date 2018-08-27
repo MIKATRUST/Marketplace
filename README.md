@@ -34,9 +34,8 @@ cd work
 ```
 Get the sources for the Marketplace project from github.
 Compile and test to verify that everything works fine.
-Note : Please pay attention to the flag `-b server`
 ```sh
-git clone -b server https://github.com/MIKATRUST/Marketplace.git
+git clone https://github.com/MIKATRUST/Marketplace.git
 cd Marketplace
 truffle compile
 start Ganache
