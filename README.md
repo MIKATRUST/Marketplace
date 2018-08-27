@@ -1,6 +1,6 @@
 # Marketplace
 
-This central marketplace is managed from a business point of view by a group of administrators who can manage store owner. The group of approved store owners can create shops and manage products withins theses shops. Shopper can visit shops and buy products. Owner of the store can get funds from its store through a pull payment mechanism.
+This central marketplace is businessly managed by a group of administrators who can manage administrators and approved store owners. The marketplace is technically managed by an owner for technical operation. The group of approved store owners can create store(s). Each store owner can manage the products in its store. Shopper can visit shop and buy products. Funds are secured in each store by being sequestered inside a store escrow. Payment withdrawal from the store owners is achieved through a pull payment mechanism.
 
 ## Prerequisites
 have git, Truffle and Ganache installed and running.
@@ -13,6 +13,8 @@ npm 6.1.0
 Truffle v4.1.13 (core: 4.1.13)
 Solidity v0.4.24 (solc-js)
 Ganache 1.1.0
+Opera 55.0.2994.44
+Metamask 3.14.1
 ```
 
 Marketplace has been tested on Ubuntu with the following software versions:
@@ -21,6 +23,7 @@ Ubuntu 16.04
 node v8.11.4
 npm 5.6.0
 ```
+Note : Truffle should use the port 8545.
 
 ## Getting Started
 ### Step 0 : Get the marketplace project and test the smart contracts
@@ -88,6 +91,11 @@ We can now start the server. You should be able to see the front end of the Meta
 ```sh
 ng serve
 ```
+### Step 4 : Play with the marketplace
+To facilitate testing of the marketplace, it is recommended to have 3 name users in your Metamask local network with the following name (you can do it by importing the private key from Ganache and editing teh default name for the account) :
+* Admin for Ganache account[0]. Note : the deployer of the contract has de-facto the role "marketplaceAdministrator". Admin can add role "marketplaceAdministrator" to given user(s). Admin can add role "marketplaceApprovedStoreOwner" to given user(s).
+* StoreOwner for Ganache account[1]. Note : Admin should had manually the role 'marketplaceApprovedStoreOwner' to Ganache account[1].
+* Shopper for Ganache account[3]. Note : any unknown address is considered by the marketplace to have the role "shopper".
 
 ## Architecture
 The marketplace is architectures around 5+ contracts :

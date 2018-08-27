@@ -2,8 +2,8 @@
 Here we explain what measures have been taken to ensure that the contracts are not susceptible to common attacks.
 
 ### Re-Entrancy
-* Vulnerability : This attack can occur when a contract sends ether to an unknown address. An attacker can carefully construct a contract at an external address which contains malicious code in the fallback function.
-* Preventive technique : We Adopted a defensive way of programming : finish all the internal work first, before calling the external function or use asynchronous payment based on the pattern pull payment. We avoided calling external contract, except the built-in transfer() function. Moreover, good purchasing use asynchronous payment (=pull payment pattern) where funds sequestered inside an escrow.
+* Vulnerability : This attack can occur when a contract sends ether to an unknown address. An attacker can carefully construct a contract at an external address which contains malicious code.
+* Preventive technique : We Adopted a defensive way of programming : finish all the internal work first, before calling the external function or use asynchronous payment based on the pattern pull payment. We also adopted the debit/diminish first then credit/add. We avoided calling external contract, except the built-in transfer() function. Moreover, good purchasing use asynchronous payment (=pull payment pattern) where funds sequestered inside an escrow.
 
 ### Forcibly sending Ether to a Contract
 * Vulnerability : It is possible to forcibly send Ether to a contract without triggering its fallback function. This is an important consideration when placing important logic in the fallback function or making calculations based on a contract's balance.
