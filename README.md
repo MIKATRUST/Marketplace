@@ -121,7 +121,7 @@ The marketplace is architectures around 5+ contracts :
 * Migrations.sol : to handle migration of contracts.
 
 We made an extensive use of EthPM assets, particularly from Open Zeppelin, here the lib / contract that were used in our project:
-* SafeMath : Library for SafeMath operation
+* SafeMath : Library for SafeMath operations.
 * Ownable : A contract to handle owning operation.
 * RBAC.sol / Roles:.sol : A library used to manage addresses assigned to different user roles and an example Role-Based Access Control (RBAC) interface that demonstrates how to handle setters and getters for roles and addresses.
 * PullPayment.sol / Escrow.sol : A contract that implement a pull payment system based on an escrow.
