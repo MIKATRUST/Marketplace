@@ -3,7 +3,8 @@
 This central marketplace is businessly managed by a group of administrators who can manage administrators and approved store owners. The marketplace is technically managed by an owner for technical operation. The group of approved store owners can create store(s). Each store owner can manage the products in its store. Shopper can visit shop and buy products. Funds are secured in each store by being sequestered inside a store escrow. Payment withdrawal from the store owners is achieved through a pull payment mechanism.
 
 ## Prerequisites
-have git, Truffle and Ganache installed and running.
+* Have git, Truffle and Ganache installed and running.
+* Have Angular installed (sudo npm install -g @angular/cli)
 
 Marketplace has been tested on Mac with the following software versions :
 ```sh

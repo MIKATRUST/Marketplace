@@ -33,11 +33,13 @@ CrudStore
   string constant MKT_ROLE_ADMIN = 'marketplaceAdministrator';
   string constant MKT_ROLE_APPROVED_STORE_OWNER = 'marketplaceApprovedStoreOwner';
 
-  uint256 nAdmin = 0; //number of operator having the role MKT_ROLE_ADMIN
-
-  //temporary variables, dynamic arrays, to refacto with CRUD user
+  /**
+  * Variable, dynamic array, to refacto as part of Futur Crud User
+  */
   address[] marketplaceAdministrators;
+  uint256 nAdmin = 0;
   address[] approvedStoreOwners;
+  uint256 nAppStoOwner = 0;
 
   /**
   * Events - publicize actions to external listeners
@@ -69,6 +71,10 @@ CrudStore
   CrudStore()
   {
     super.addRole(msg.sender, MKT_ROLE_ADMIN);
+
+    marketplaceAdministrators.push(msg.sender);
+    nAdmin++;
+    emit LogAddedRoleAdministrator(msg.sender, msg.sender);
   }
 
   /**
@@ -142,6 +148,7 @@ CrudStore
   {
     super.addRole(operator, MKT_ROLE_APPROVED_STORE_OWNER);
     approvedStoreOwners.push(operator);
+    nAppStoOwner++;
     emit LogAddedRoleApprovedStoreOwner(msg.sender, operator);
   }
 
@@ -160,6 +167,7 @@ CrudStore
   {
     super.removeRole(operator, MKT_ROLE_APPROVED_STORE_OWNER);
     //TBD : update CRUD user
+    nAppStoOwner--;
     emit LogDeletedRoleApprovedStoreOWner(msg.sender, operator);
   }
 

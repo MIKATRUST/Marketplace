@@ -16,6 +16,8 @@ import '../node_modules/openzeppelin-solidity/contracts/payment/PullPayment.sol'
  * transferred. Before ownership change, store owner must withdrawPayments.
  * @dev Store is pausable.
  * @dev Store is destroyable.
+ * @dev refacto needed, expose publicly less public method, make more method
+ * as internal.
  */
 contract Store is
 Ownable,
@@ -182,13 +184,12 @@ PullPayment
   }
 
   /**
-  * @dev get to product information for a given product SKU in the store.
+  * @dev get product information for a given product SKU in the store.
   * @dev Returns productName The name of the product.
   * @dev Returns productQuantity The available quantity of the product.
   * @dev Returns productDescription The description of teh product.
   * @dev Returns productPrice The UNIT price of the product.
   * @dev Returns productImage The image link of the product.
-  * @dev Returns productQuantity The available quantity of the product.
   * @param productSku The SKU of the product.
   */
   function getProduct(uint productSku)
@@ -199,6 +200,48 @@ PullPayment
   {
     return(super.getCrudItem(productSku));
   }
+
+  /**
+  * @dev get all product of the store.
+  * @dev Returns productSkus[] The Skus of the products.
+  * @dev Returns productName[] The names of the products.
+  * @dev Returns productQuantity[] The available quantities of the products.
+  * @dev Returns productDescription[] The descriptions of the products.
+  * @dev Returns productPrice[] The UNIT prices of the products.
+  * @dev Returns productImage[] The image links of the products.
+  * @dev Could be potentially used for DOS, ag create a large number of article
+  * there is a need to add pagination.
+  * @dev TO refacto
+
+  function getProducts()
+    public
+    view
+    returns(uint [], bytes32 [], uint [], bytes32 [], uint [],bytes32 [])
+    {
+    uint productCount = getProductCount();
+    uint [] memory productSkus = new uint[](productCount);
+    bytes32 [] memory productNames = new bytes32[](productCount);
+    uint [] memory productQuantities = new uint[](productCount);
+    bytes32 [] memory productDescriptions = new bytes32[](productCount);
+    uint [] memory productPrices = new uint[](productCount);
+    bytes32 [] memory productImages = new bytes32[](productCount);
+
+
+    for (uint i = 0; i < productCount; i++) {
+      uint productSku = getProductAtIndex(i);
+
+      (bytes32 productName, uint productQuantity, bytes32 productDescription, uint productPrice, bytes32 productImage, uint index) = getProduct(productSku);
+
+      productSkus[i] = productSku;
+      productNames[i] = productName;
+      productQuantities[i] = productQuantity;
+      productDescriptions[i] = productDescription;
+      productPrices[i] = productPrice;
+      productImages[i] = productImage;
+    }
+    return(productSkus, productNames, productQuantities, productDescriptions, productPrices, productImages);
+  }
+  */
 
   /**
   * @dev Get the product Unit price and quantity for a given product SKU
@@ -226,7 +269,7 @@ PullPayment
     public
     view
     returns(uint productSku)
-  {
+    {
     return (super.getCrudItemAtIndex(index));
   }
 
