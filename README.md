@@ -108,7 +108,7 @@ We can now start the server.
 ```sh
 ng serve
 ```
-You should be able to see the front end of the Metacoin application by directing your web3 enabled browser to http://localhost:4200/
+You should be able to see the front end of the Marketplace application by directing your web3 enabled browser to http://localhost:4200/
 
 ### Step 4 : Play with the marketplace
 To facilitate testing of the marketplace, it is recommended to have 3 name users in your Metamask local network with the following name (you can do it by importing the private key from Ganache and editing teh default name for the account) :
