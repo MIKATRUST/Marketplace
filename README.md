@@ -112,6 +112,7 @@ To facilitate testing of the marketplace, it is recommended to have 3 name users
 * Admin for Ganache account[0]. Note : the deployer of the contract has de-facto the role "marketplaceAdministrator". Admin can add role "marketplaceAdministrator" to given user(s). Admin can add role "marketplaceApprovedStoreOwner" to given user(s).
 * StoreOwner for Ganache account[1]. Note : Admin should had manually the role 'marketplaceApprovedStoreOwner' to Ganache account[1].
 * Shopper for Ganache account[3]. Note : any unknown address is considered by the marketplace to have the role "shopper".
+* Note : please consider manual refresh to of the browser to watch the update of the state.
 
 ## Architecture
 The marketplace is architectures around 5+ contracts :
