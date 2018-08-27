@@ -1,0 +1,252 @@
+pragma solidity ^0.4.24;
+
+/**
+ * @title Crud User contract
+ * @dev C.R.U.D. — Create, Retrieve, Update, Delete Users
+ * @dev Low level call/transaction to access user privately defined in
+ * CrudUser contract.
+ * @dev index are subjected to change, eg when an element is deleted. Invariant
+ * is the userAddress of the user which is also the key of the mapping.
+ * @dev Internal function to be inherited by a contract.
+ * @dev Adapted work from Rob Hitchens, Google for "Solidity CRUD- Part 1"
+ */
+contract CrudUser {
+
+  struct UserStruct {
+    string userRole; //so far a single role
+    bytes32 userName;
+    uint userQuantity;
+    bytes32 userDescription;
+    uint userPrice;
+    bytes32 userImage;
+    uint index;
+  }
+
+  mapping(address => UserStruct) private userStructs;
+  address[] private userIndex;
+
+  /**
+  * Events - publicize actions to external listeners
+  */
+  event LogCrudNewUser   (uint indexed userAddress, uint index, bytes32 userName, uint userQuantity, bytes32 userDescription, uint userPrice, bytes32 userImage);
+  event LogCrudUpdateUser(uint indexed userAddress, uint index, bytes32 userName, uint userQuantity, bytes32 userDescription, uint userPrice, bytes32 userImage);
+  event LogCrudDeleteUser(uint indexed userAddress, uint index);
+
+  /**
+   * @dev Revert if user address does not exist in CrudUser.
+   */
+  modifier isACrudUser (uint _userAddress)
+  {
+      require (isCrudUser(_userAddress) == true,
+        "this is not a user address."
+      );
+      _;
+  }
+
+  /**
+   * @dev Revert if user address does exist in CrudUser.
+   */
+  modifier isNotACrudUser (uint _userAddress)
+  {
+      require (isCrudUser(_userAddress) == false,
+        "this is a user address."
+      );
+      _;
+  }
+
+  /**
+   * @dev Revert if user address does exist in CrudUser.
+   * @dev Returns boolean true if given user address exists in CrudUser.
+   * @param userAddress if the sku to be tested.
+   */
+  function isCrudUser(uint userAddress)
+    internal
+    constant
+    returns(bool isIndeed)
+  {
+    if(userIndex.length == 0) return false;
+    return (userIndex[userStructs[userAddress].index] == userAddress);
+  }
+
+  /**
+   * @dev Insert a new user in CrudUser.
+   * @dev Returns the index in CrudUser of the newly inserted user.
+   * @param userAddress The address of the user.
+   * @param userName The name of the user.
+   * @param userQuantity The available quantity of the user.
+   * @param userDescription The description of the user
+   * @param userPrice The UNIT price of the user.
+   * @param userImage The image link of the user.
+   */
+  function insertCrudUser(
+    uint userAddress,
+    bytes32 userName,
+    uint userQuantity,
+    bytes32 userDescription,
+    uint userPrice,
+    bytes32 userImage)
+    internal
+    isNotACrudUser(userAddress)
+    returns(uint index)
+  {
+    userStructs[userAddress].userName = userName;
+    userStructs[userAddress].userQuantity = userQuantity;
+    userStructs[userAddress].userDescription = userDescription;
+    userStructs[userAddress].userPrice = userPrice;
+    userStructs[userAddress].userImage = userImage;
+    userStructs[userAddress].index = userIndex.push(userAddress)-1;
+    emit LogCrudNewUser(
+      userAddress,
+      userStructs[userAddress].index,
+      userName,
+      userQuantity,
+      userDescription,
+      userPrice,
+      userImage);
+    return userIndex.length-1;
+  }
+
+  /**
+   * @dev Delete a given userAddress in CrudUser.
+   * @dev Returns the index of deleted user in CrudUser.
+   * @param userAddress The address of the user to remove.
+   */
+  function deleteCrudUser(uint userAddress)
+    internal
+    isACrudUser(userAddress)
+    returns(uint index)
+  {
+    uint rowToDelete = userStructs[userAddress].index;
+    uint keyToMove = userIndex[userIndex.length-1];
+    userIndex[rowToDelete] = keyToMove;
+    userStructs[keyToMove].index = rowToDelete;
+    userIndex.length--;
+    emit LogCrudDeleteUser(
+        userAddress,
+        rowToDelete);
+    emit LogCrudUpdateUser(
+      keyToMove,
+      rowToDelete,
+      userStructs[keyToMove].userName,
+      userStructs[keyToMove].userQuantity,
+      userStructs[keyToMove].userDescription,
+      userStructs[keyToMove].userPrice,
+      userStructs[keyToMove].userImage);
+    return rowToDelete;
+  }
+
+  /**
+   * @dev Get a user given the user address.
+   * @dev Returns the index in CrudUser of the newly inserted user.
+   * @dev Returns userName The name of the user.
+   * @dev Returns userQuantity The available quantity of the user.
+   * @dev Returns userDescription The description of the user.
+   * @dev Returns userPrice The UNIT price of the user.
+   * @dev Returns userImage The image link of the user.
+   * @dev Returns index The index of the user in the contract CrudUser.
+   * @param userAddress The address of the user.
+   */
+  function getCrudUser(uint userAddress)
+    internal
+    isACrudUser(userAddress)
+    constant
+    returns(bytes32 userName, uint userQuantity, bytes32 userDescription, uint userPrice, bytes32 userImage, uint index)
+  {
+    return(
+      userStructs[userAddress].userName,
+      userStructs[userAddress].userQuantity,
+      userStructs[userAddress].userDescription,
+      userStructs[userAddress].userPrice,
+      userStructs[userAddress].userImage,
+      userStructs[userAddress].index);
+  }
+
+  /**
+   * @dev Get available quantity and price for a given address user.
+   * @dev Returns quantity of given address user.
+   * @dev Returns price of given address user.
+   * @param userAddress The address of the user.
+   */
+  function getCrudUserQuantityPrice(uint userAddress)
+    internal
+    isACrudUser(userAddress)
+    constant
+    returns(uint userQuantity, uint userPrice)
+  {
+    return(
+      userStructs[userAddress].userQuantity,
+      userStructs[userAddress].userPrice);
+  }
+
+  /**
+   * @dev Update the price of an user.
+   * @dev Returns boolean success if success.
+   * @param userAddress The address of the user.
+   * @param userPrice The UNIT price of the sku user.
+   */
+  function updateCrudUserPrice(uint userAddress, uint userPrice)
+    internal
+    isACrudUser(userAddress)
+    returns(bool success)
+  {
+    userStructs[userAddress].userPrice = userPrice;
+    emit LogCrudUpdateUser(
+      userAddress,
+      userStructs[userAddress].index,
+      userStructs[userAddress].userName,
+      userStructs[userAddress].userQuantity,
+      userStructs[userAddress].userDescription,
+      userPrice,
+      userStructs[userAddress].userImage);
+    return true;
+  }
+
+  /**
+   * @dev Update the available quantity of an user.
+   * @dev Returns boolean success if success.
+   * @param userAddress The address of the user.
+   * @param userQuantity The update for the quantity.
+   */
+  function updateCrudUserQuantity(uint userAddress, uint userQuantity)
+    internal
+    isACrudUser(userAddress)
+    returns(bool success)
+  {
+    userStructs[userAddress].userQuantity = userQuantity;
+    emit LogCrudUpdateUser(
+      userAddress,
+      userStructs[userAddress].index,
+      userStructs[userAddress].userName,
+      userQuantity,
+      userStructs[userAddress].userDescription,
+      userStructs[userAddress].userPrice,
+      userStructs[userAddress].userImage);
+    return true;
+  }
+
+  /**
+  * @dev Get the user address count in CrudUser.
+  * @dev Returns count of address in the contract.
+  */
+  function getCrudUserCount()
+    internal
+    constant
+    returns(uint count)
+  {
+    return userIndex.length;
+  }
+
+  /**
+  * @dev Get user index in CrudUser.
+  * @dev Returns userAddress The sku of the user.
+  * @param index The index of the user in CrudeUser.
+  */
+  function getCrudUserAtIndex(uint index)
+    internal
+    constant
+    returns(uint userAddress)
+  {
+    return userIndex[index];
+  }
+
+}
