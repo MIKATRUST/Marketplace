@@ -1,5 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 
+//added 2018/08/Maa
+import { CommonModule } from '@angular/common';
+import { BrowserModule } from '@angular/platform-browser'
+//
+
 import { Web3Service } from "../../util/web3.service";
 
 @Component({
@@ -15,20 +20,33 @@ export class MetaSenderComponent implements OnInit {
   accounts: string[];
   //metaCoinInstance: any;
   marketplaceInstance: any;
+  storeInstance: any;
+
+  rcvAddProduct = {
+    rcvAddStore:"",
+    rcvAddProductSku:0,
+    rcvAddProductName:"",
+    rcvAddProductQuantity:0,
+    rcvAddProductDescription:"",
+    rcvAddProductPrice:0,
+    rcvAddProductImage:""
+  };
 
   model = {
     amount: 5,
     receiver: "",
     balance: 0,
     account: "",
-    isMarketplaceAdministrator:0,
-    isMarketplaceApprovedStoreOwner:0,
-    role:"",
+
+    primaryRole:"",
     approvedStoreOwners:[],
     marketplaceAdministrators:[],
     myStoresName:[], //as an approvedStoreOwner
     myStoresAddress:[],
-    storeProducts:[]
+    showContent:false,
+    storeProducts:[],
+    stores:[] //stores in the marketplace ... eventually for a given store owner
+    //isAuth: boolean = false;
   };
 
   //marketplaceAdministrator
@@ -43,9 +61,11 @@ export class MetaSenderComponent implements OnInit {
     this.marketplaceInstance = await this.web3Service.Marketplace.deployed();
     //this.refreshBalance() ORIGINAL
     //this.getStoresCountAddress();
-    this.getRole();
+    this.getPrimaryRole();
     this.getMarketplaceAdministrators();
     this.getMarketplaceApprovedStoreOwners();
+    this.getStores();
+    //this.model.showContent=false;
     //this.addApprovedStoreOwner();
   }
 
@@ -63,7 +83,7 @@ export class MetaSenderComponent implements OnInit {
     this.status = status;
   };
 
-  getRole(){
+  getPrimaryRole(){
     if (!this.marketplaceInstance) {
       this.setStatus("marketplace instance is not loaded, unable to send transaction");
       return;
@@ -72,32 +92,15 @@ export class MetaSenderComponent implements OnInit {
     console.log("Getting role, isAdministrator ?");
     this.setStatus("Initiating transaction... (please wait)");
 
-    this.marketplaceInstance.hasRole.call(this.model.account, "marketplaceAdministrator",
+    this.marketplaceInstance.getPrimaryRole.call(this.model.account,
     {from: this.model.account }).then((value) => {
-      console.log("is role marketplaceAdministrator ? ", value);
-      this.model.isMarketplaceAdministrator = value;
+      console.log("primary role ? ", value);
+      this.model.primaryRole = value;
+      console.log("$PRIMARY ROLE", this.model.primaryRole,value);
     }).catch((e) => {
       console.log(e);
-      this.setStatus("Error getting role administrator; see log.");
+      this.setStatus("Error getting primary role; see log.");
     });
-
-
-    console.log("Getting role, isapprovedStoreOwner ?");
-    this.setStatus("Initiating transaction... (please wait)");
-
-    this.marketplaceInstance.hasRole.call(this.model.account, "marketplaceApprovedStoreOwner",
-    {from: this.model.account }).then((value) => {
-      console.log("is role marketplaceApprovedStoreOwner ? ", value);
-      this.model.isMarketplaceApprovedStoreOwner = value;
-    }).catch((e) => {
-      console.log(e);
-      this.setStatus("Error getting role approvedStoreOwner; see log.");
-    });
-
-    this.model.role = "shopper";
-    if(Boolean(this.model.isMarketplaceApprovedStoreOwner)==Boolean('true'))this.model.role = "marketplaceApprovedStoreOwner";
-    if(Boolean(this.model.isMarketplaceAdministrator)==Boolean('true'))this.model.role = "marketplaceAdministrator";
-
   };
 
 //<h3>Approved store owners Count : {{this.model.approvedStoreOwners}}</h3>
@@ -123,7 +126,7 @@ getMarketplaceAdministrators(){
 //getApprovedStoreOwners
   this.marketplaceInstance.getMarketplaceAdministrators.call(
   {from: this.model.account }).then((value) => {
-    console.log("administrators ", value);
+    console.log("*administrators ", value);
     this.model.marketplaceAdministrators = value;
   }).catch((e) => {
     console.log(e);
@@ -192,12 +195,10 @@ getMarketplaceAdministrators(){
 
     console.log("Getting approved stores owners");
     this.setStatus("Initiating transaction... (please wait)");
-//getStores
-//getMarketplaceAdministrators
-//getApprovedStoreOwners
+
     this.marketplaceInstance.getApprovedStoreOwners.call(
     {from: this.model.account }).then((value) => {
-      console.log("approved store owners ", value);
+      console.log("*approved store owners ", value);
       this.model.approvedStoreOwners = value;
     }).catch((e) => {
       console.log(e);
@@ -256,6 +257,90 @@ getMarketplaceAdministrators(){
     }).catch((e) => {
       console.log(e);
       this.setStatus("Error removing approved store owner; see log.");
+    });
+  }
+
+  createStore(){
+    if (!this.marketplaceInstance) {
+      this.setStatus("marketplace instance is not loaded, unable to send transaction");
+      return;
+    };
+
+    let receiver = this.model.receiver;
+    console.log("creating store" + this.model.receiver);
+    this.setStatus("Initiating transaction... (please wait)");
+
+    this.marketplaceInstance.createStore(receiver,
+    {from: this.model.account }).then((success) => {
+      if (!success) {
+        this.setStatus("Transaction failed!");
+      }
+      else {
+        this.setStatus("Transaction complete!");
+        //this.refreshBalance();
+      }
+    }).catch((e) => {
+      console.log(e);
+      this.setStatus("Error creating store; see log.");
+    });
+  }
+
+  getStores(){
+    if (!this.marketplaceInstance) {
+      this.setStatus("marketplace instance is not loaded, unable to send transaction");
+      return;
+    };
+
+    console.log("Getting stores");
+    this.setStatus("Initiating transaction... (please wait)");
+
+    this.marketplaceInstance.getStores.call(
+    {from: this.model.account }).then((value) => {
+      console.log("*stores in the marketplace ", value);
+      this.model.stores = value;
+    }).catch((e) => {
+      console.log(e);
+      this.setStatus("Error getting stores; see log.");
+    });
+  }
+
+  async addProduct(){
+    let rcvAddStore = this.rcvAddProduct.rcvAddStore;
+    let rcvAddProductSku = this.rcvAddProduct.rcvAddProductSku;
+    let rcvAddProductName = this.rcvAddProduct.rcvAddProductName;
+    let rcvAddProductQuantity = this.rcvAddProduct.rcvAddProductQuantity;
+    let rcvAddProductDescription = this.rcvAddProduct.rcvAddProductDescription;
+    let rcvAddProductPrice = this.rcvAddProduct.rcvAddProductPrice;
+    let rcvAddProductImage = this.rcvAddProduct.rcvAddProductImage;
+
+    let receiver = this.model.receiver; //address
+    //this.marketplaceInstance = await this.web3Service.Marketplace.deployed();
+
+    this.storeInstance = await this.web3Service.Store.at(rcvAddStore).deployed();
+
+    if (!this.storeInstance) {
+      this.setStatus("store instance is not loaded, unable to send transaction");
+      return;
+    };
+
+    console.log("adding product" + this.rcvAddProduct.rcvAddStore, this.rcvAddProduct.rcvAddProductSku);
+    this.setStatus("Initiating transaction... (please wait)");
+
+    //this.storeInstance.rcvAddProduct(rcvAddProductSku,rcvAddProductName,rcvAddProductQuantity,
+    //  rcvAddProductDescription,rcvAddProductPrice,rcvAddProductImage,{from: this.model.account })
+
+    this.storeInstance.addProduct("1234567","Bike",10,"nice bike",1000000000,"img",{from: this.model.account })
+      .then((success) => {
+      if (!success) {
+        this.setStatus("Transaction failed!");
+      }
+      else {
+        this.setStatus("Transaction complete!");
+        //this.refreshBalance();
+      }
+    }).catch((e) => {
+      console.log(e);
+      this.setStatus("Error creating store; see log.");
     });
   }
 
@@ -393,6 +478,5 @@ getMarketplaceAdministrators(){
     console.log("Setting receiver: " + e.target.value);
     this.model.receiver = e.target.value;
   }
-
 
 }

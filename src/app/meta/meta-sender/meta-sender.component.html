@@ -1,10 +1,8 @@
-<select name="account" (change)="clickAddress($event)">
-  <option *ngFor="let account of accounts" >{{account}}</option>
-</select>
-<h2>Welcome</h2>
+
 <h3>Your address is : {{model.account}}</h3>
-<h3>Your role is : {{model.role}}</h3>
-<h2>As an administrator of the marketplace, you can manage it</h2>
+<h3>Your primary role is : {{model.primaryRole}}</h3>
+
+<h2>If your are an administrator of the marketplace, you can manage it</h2>
 <h3>Marketplace administrators</h3>
 <h4><br></h4>
 <h4>Existing administrators in the marketplace : {{model.marketplaceAdministrators.length}} </h4>
@@ -19,38 +17,49 @@
 <button id="send" (click)="addRoleAdministrator()">Add as administrator</button>
 <h3>Marketplace approved store owners</h3>
 <h4><br></h4>
-<h4>Existing approved store owners in the marketplace : {{model.approvedStoreOwners.length}} </h4>
+
+<h4>Existing approved store owners in the marketplace : {{model.stores.length}} </h4>
 <h4><tr *ngFor="let j of this.model.approvedStoreOwners">
 <td>{{j}}</td>
 <button id="send" (click)="removeApprovedStoreOwner()">Delete</button>
 </tr>
 </h4>
 <br>
+
 <h4>Add approved store owners to the marketplace</h4>
 <label for="receiver">Address:</label><input type="text" id="receiver" placeholder="e.g., 0x93e66d9baea28c17d9fc393b53e3fbdd76899dae" (change)="setReceiver($event)">
 <button id="send" (click)="addApprovedStoreOwner()">Add as approved store owner</button>
 
-<h2>As an approved store owner, I can manage my stores</h2>
-<h3>My stores (address) : </h3>
-<h3>Count : <h3>
-<h3>My funds : </h3>
-<h3>Create new store : </h3>
-<h3>Product page : del/add Products </h3>
 
-<h2>As a shopper, I can browse the store,  </h2>
+<h2>If you are an approved store owner, you can manage your stores</h2>
+<h4>(My) Existing stores (address) : {{model.stores.length}} </h4>
+<h4><tr *ngFor="let l of this.model.stores">
+<td>{{l}}</td>
+<button id="send" (click)="deleteStore()">Delete</button>
+</tr>
+
+<h3>Create new store : </h3>
+<label for="receiver">Name:</label><input type="text" id="receiver" placeholder="e.g., Old cars" (change)="setReceiver($event)">
+<button id="send" (click)="createStore()">Create store</button>
+
+<h3>As a store owner I can add a product in my store</h3>
+
+<label for="receiver">Addresse of the store:</label><input type="text" id="receiver" placeholder="e.g., 0x93e66d9baea28c17d9fc393b53e3fbdd76899dae" (change)="setReceiver($event)"><br>
+<label for="rcvAddProductSku">Product SKU:</label><input type="text" id="rcvAddProductSku" placeholder="e.g., 12123" (change)="setReceiver($event)"><br>
+<label for="rcvAddProductName">Product Name:</label><input type="text" id="rcvAddProductName" placeholder="e.g., Red Bike" (change)="setReceiver($event)"><br>
+<label for="rcvAddProductQuantity">Product Quantity:</label><input type="text" id="rcvAddProductQuantity" placeholder="e.g., 12" (change)="setReceiver($event)"><br>
+<label for="rcvAddProductDescription">Product Description:</label><input type="text" id="rcvAddProductDescription" placeholder="e.g., A very nice bike for children 5-7 yo" (change)="setReceiver($event)"><br>
+<label for="rcvAddProductPrice">Product Price:</label><input type="text" id="rcvAddProductPrice" placeholder="e.g., 1000000000" (change)="setReceiver($event)"><br>
+<label for="rcvAddProductImage">Product Image:</label><input type="text" id="rcvAddProductImage" placeholder="e.g., /src/Bike01.png" (change)="setReceiver($event)"><br>
+
+<button id="send" (click)="addProduct()">Add product</button>
+
+<h2>If you are a shopper, your can browse the stores and purchase product  </h2>
 <h3>My funds : </h3>
 <h3>Available stores </h3>
 <h3>Count : <h3>
-<h3>Products of store Car1 : del/add Products </h3>
 
-<h1>********************* </h1>
-
-<h3>Count : {{model.myStoresName.length}}<h3>
-<h3>{{model.account}} - You have {{model.balance}} META</h3>
-<h3>{{model.account}} - You have {{model.balance}} META</h3>
+<h3>As a shopper, I can browse the products<h3>
+<h3>AS a Shopper, I can buy </h3>
 <br>
-<h1>Send MetaCoin</h1>
-<br><label for="amount">Amount:</label><input type="text" id="amount" placeholder="e.g., 95" (change)="setAmount($event)">
-<br><br><button id="send" (click)="sendCoin()">Send MetaCoin</button>
-<br><br>
 <span id="status">{{status}}</span>

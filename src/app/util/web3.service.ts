@@ -5,6 +5,8 @@ import { default as contract } from 'truffle-contract';
 import { WindowRefService } from './window-ref.service';
 //import metacoin_artifacts from '../../../build/contracts/MetaCoin.json';
 import marketplace_artifacts from '../../../build/contracts/Marketplace.json';
+import store_artifacts from '../../../build/contracts/Store.json';
+
 import { Subject } from 'rxjs/Subject';
 
 @Injectable()
@@ -14,12 +16,14 @@ export class Web3Service {
   private accounts: string[];
   //public MetaCoin: any;
   public Marketplace: any;
+  public Store: any;
 
   public accountsObservable = new Subject<string[]>();
 
   constructor(private windowRef: WindowRefService) {
     //this.setupMetacoinContract();
     this.setupMarketplaceContract();
+    this.setupStoreContract();
     this.refreshAccounts();
   }
 
@@ -44,6 +48,12 @@ export class Web3Service {
     this.setupMetamaskWeb3();
     this.Marketplace = contract(marketplace_artifacts);
     this.Marketplace.setProvider(this.web3.currentProvider);
+  }
+
+  private setupStoreContract() {
+    this.setupMetamaskWeb3();
+    this.Store = contract(store_artifacts);
+    this.Store.setProvider(this.web3.currentProvider);
   }
 
   private refreshAccounts() {
