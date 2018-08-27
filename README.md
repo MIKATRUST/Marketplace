@@ -15,6 +15,7 @@ Solidity v0.4.24 (solc-js)
 Ganache 1.1.0
 Opera 55.0.2994.44
 Metamask 3.14.1
+Angular (sudo npm install -g @angular/cli)
 ```
 
 Marketplace has been tested on Ubuntu with the following software versions:
@@ -22,8 +23,18 @@ Marketplace has been tested on Ubuntu with the following software versions:
 Ubuntu 16.04
 node v8.11.4
 npm 5.6.0
+Truffle v4.1.13
+Solidity v0.4.24 (solc-js)
+Ganache-CLI V6.1.6 (Ganache Core 2.1.5)
+Firefox 61.0.1 (32 bit)
+Metamask 4.8.0
+Angular (sudo npm install -g @angular/cli)
 ```
-Note : Truffle should use the port 8545.
+
+Note :
+* Ganache should use the port 8545.
+* Metamask should use local network, port 8545.
+
 
 ## Getting Started
 ### Step 0 : Get the marketplace project and test the smart contracts
@@ -38,7 +49,9 @@ Compile and test to verify that everything works fine.
 git clone https://github.com/MIKATRUST/Marketplace.git
 cd Marketplace
 truffle compile
-start Ganache
+```
+start manually Ganache application
+```
 truffle migrate --reset
 truffle test
 ```
@@ -51,20 +64,21 @@ cd ..
 mkdir ./limelabs-angular-box/
 cd ./limelabs-angular-box/
 truffle unbox LimelabsTech/angular-truffle-box
-Restart Ganache
+```
+Restart manually Ganache application
+```
 truffle compile (you will get warnings)
 truffle migrate
 truffle test
 ng serve
 ```
 You should be able to see the front end of the Metacoin application by directing your web3 enabled browser to http://localhost:4200/
-If you can see the metacoin site, everything should be fine, you can continue and go to the next step.
+If you can see the metacoin site and send a Metacoin, everything should be fine, you can continue and go to the next step.
 Now you can stop the server
 
 ### Step 3 : Inject the Marketplace project inside the limelabs-angular-box truffle box
 Let's do some cleaning.
 ```sh
-cd ..
 rm -rf ./limelabs-angular-box/contracts
 rm -rf ./limelabs-angular-box/migrations
 rm -rf ./limelabs-angular-box/test
@@ -76,13 +90,15 @@ cp -R ./Marketplace/contracts ./limelabs-angular-box/contracts
 cp -R ./Marketplace/migrations ./limelabs-angular-box/migrations
 cp -R ./Marketplace/test ./limelabs-angular-box/test
 cp -R ./Marketplace/src ./limelabs-angular-box/src
-cp -R ./Marketplace/node_modules ./limelabs-angular-box/node_modules
 cp -R ./Marketplace/node_modules/* ./limelabs-angular-box/node_modules/
 ```
 Then we test again
 ```sh
 cd ./limelabs-angular-box/
 truffle compile
+```
+Restart manually Ganache application
+```sh
 truffle migrate --reset
 truffle test
 ```
