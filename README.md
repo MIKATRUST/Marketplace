@@ -29,7 +29,7 @@ Solidity v0.4.24 (solc-js)
 Ganache-CLI V6.1.6 (Ganache Core 2.1.5)
 Firefox 61.0.1 (32 bit)
 Metamask 4.8.0
-Angular (sudo npm install -g @angular/cli)
+! Angular (sudo npm install -g @angular/cli)
 ```
 
 Note :
@@ -52,7 +52,7 @@ cd Marketplace
 truffle compile
 ```
 start manually Ganache application
-```
+```sh
 truffle migrate --reset
 truffle test
 ```
@@ -67,7 +67,7 @@ cd ./limelabs-angular-box/
 truffle unbox LimelabsTech/angular-truffle-box
 ```
 Restart manually Ganache application
-```
+```sh
 truffle compile (you will get warnings)
 truffle migrate
 truffle test
@@ -75,6 +75,7 @@ ng serve
 ```
 You should be able to see the front end of the Metacoin application by directing your web3 enabled browser to http://localhost:4200/
 If you can see the metacoin site and send a Metacoin, everything should be fine, you can continue and go to the next step.
+
 Now you can stop the server
 
 ### Step 3 : Inject the Marketplace project inside the limelabs-angular-box truffle box
@@ -111,8 +112,8 @@ ng serve
 To facilitate testing of the marketplace, it is recommended to have 3 name users in your Metamask local network with the following name (you can do it by importing the private key from Ganache and editing teh default name for the account) :
 * Admin for Ganache account[0]. Note : the deployer of the contract has de-facto the role "marketplaceAdministrator". Admin can add role "marketplaceAdministrator" to given user(s). Admin can add role "marketplaceApprovedStoreOwner" to given user(s).
 * StoreOwner for Ganache account[1]. Note : Admin should had manually the role 'marketplaceApprovedStoreOwner' to Ganache account[1].
-* Shopper for Ganache account[3]. Note : any unknown address is considered by the marketplace to have the role "shopper".
-* Note : please consider manual refresh to of the browser to watch the update of the state.
+* Shopper for Ganache account[2]. Note : any unknown address is considered by the marketplace to have the role "shopper".
+* Note : please consider manual refresh of the browser to watch the update of the state.
 
 ## Architecture
 The marketplace is architectures around 5+ contracts :
